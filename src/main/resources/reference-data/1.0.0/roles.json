@@ -1,0 +1,18 @@
+{
+  "collection": "applicationConfiguration",
+  "keyField": "code",
+  "records": [
+    {
+      "code": "ROLE_ADMIN",
+      "description": "Administrator role"
+    },
+    {
+      "code": "ROLE_API",
+      "description": "API service role"
+    },
+    {
+      "code": "ROLE_READONLY",
+      "description": "Read only role"
+    }
+  ]
+}

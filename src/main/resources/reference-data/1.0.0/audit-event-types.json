@@ -1,0 +1,18 @@
+{
+  "collection": "applicationConfiguration",
+  "keyField": "code",
+  "records": [
+    {
+      "code": "AUDIT_LOGIN_SUCCESS",
+      "description": "Login success audit event"
+    },
+    {
+      "code": "AUDIT_LOGIN_FAILURE",
+      "description": "Login failure audit event"
+    },
+    {
+      "code": "AUDIT_TOKEN_GENERATED",
+      "description": "Token generated audit event"
+    }
+  ]
+}

@@ -61,3 +61,24 @@ security:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+mongodb:
+  username:
+  password:
+  authenticationDatabase: admin
+  database: enterprise_foundation
+  sslEnabled: false
+  sslInvalidHostnameAllowed: false
+  connectTimeout: 10000
+  socketTimeout: 10000
+  serverAddresses:
+    - localhost:27017
+  dbCollectionNames:
+    applicationVersion: applicationVersion
+    applicationConfiguration: applicationConfiguration
+    userAuthorization: userAuthorization
+    apiTokens: apiTokens
+    auditTrail: audit_records
+    schedulerJobs: schedulerJobs
+    schedulerHistory: schedulerHistory
+    sampleCollection: samples
