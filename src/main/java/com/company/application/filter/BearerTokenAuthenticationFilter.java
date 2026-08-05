@@ -1,7 +1,8 @@
 package com.company.application.filter;
 
 import com.company.application.constants.SecurityConstants;
-import com.company.application.exception.InvalidTokenException;
+import com.company.application.audit.AuditService;
+import com.company.application.exception.SecurityException;
 import com.company.application.security.TokenDetails;
 import com.company.application.security.TokenService;
 import java.io.IOException;
@@ -23,9 +24,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
+    private final AuditService auditService;
 
-    public BearerTokenAuthenticationFilter(TokenService tokenService) {
+    public BearerTokenAuthenticationFilter(TokenService tokenService, AuditService auditService) {
         this.tokenService = tokenService;
+        this.auditService = auditService;
     }
 
     @Override
@@ -41,9 +44,9 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
                                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                                 .collect(Collectors.toList()));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (InvalidTokenException ex) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
-                return;
+            } catch (SecurityException ex) {
+                auditService.record("INVALID_TOKEN", "unknown", org.slf4j.MDC.get("correlationId"));
+                throw ex;
             }
         }
         chain.doFilter(request, response);

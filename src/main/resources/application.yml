@@ -37,10 +37,16 @@ ldap:
   securityProtocol:
   securityAuthentication: simple
   peopleDirectory: ou=people,dc=company,dc=com
+  connectionTimeoutMillis: 5000
+  readTimeoutMillis: 5000
 
 security:
+  authenticationMode: ldap
+  passwordPolicy:
+    enabled: false
   token:
     expirationSeconds: 1800
+    refreshWindowSeconds: 300
     sameOriginRequired: false
   roles:
     admin:

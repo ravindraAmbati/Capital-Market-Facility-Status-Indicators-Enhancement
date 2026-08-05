@@ -13,6 +13,8 @@ public class LdapProperties {
     private String securityProtocol;
     private String securityAuthentication;
     private String peopleDirectory;
+    private int connectionTimeoutMillis = 5000;
+    private int readTimeoutMillis = 5000;
 
     public String getInitialContextFactory() {
         return initialContextFactory;
@@ -52,5 +54,21 @@ public class LdapProperties {
 
     public void setPeopleDirectory(String peopleDirectory) {
         this.peopleDirectory = peopleDirectory;
+    }
+
+    public int getConnectionTimeoutMillis() {
+        return connectionTimeoutMillis;
+    }
+
+    public void setConnectionTimeoutMillis(int connectionTimeoutMillis) {
+        this.connectionTimeoutMillis = connectionTimeoutMillis;
+    }
+
+    public int getReadTimeoutMillis() {
+        return readTimeoutMillis;
+    }
+
+    public void setReadTimeoutMillis(int readTimeoutMillis) {
+        this.readTimeoutMillis = readTimeoutMillis;
     }
 }

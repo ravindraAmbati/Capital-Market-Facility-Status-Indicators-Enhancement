@@ -37,6 +37,8 @@ public class LdapConnectionFactory {
         environment.put(Context.INITIAL_CONTEXT_FACTORY, properties.getInitialContextFactory());
         environment.put(Context.PROVIDER_URL, properties.getProviderUrl());
         environment.put(Context.SECURITY_AUTHENTICATION, properties.getSecurityAuthentication());
+        environment.put("com.sun.jndi.ldap.connect.timeout", String.valueOf(properties.getConnectionTimeoutMillis()));
+        environment.put("com.sun.jndi.ldap.read.timeout", String.valueOf(properties.getReadTimeoutMillis()));
         if (StringUtils.hasText(properties.getSecurityProtocol())) {
             environment.put(Context.SECURITY_PROTOCOL, properties.getSecurityProtocol());
         }

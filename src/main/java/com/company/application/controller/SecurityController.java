@@ -1,16 +1,14 @@
 package com.company.application.controller;
 
-import com.company.application.audit.AuditService;
-import com.company.application.authentication.LdapAuthenticationService;
-import com.company.application.authorization.AuthorizationService;
-import com.company.application.constants.SecurityConstants;
 import com.company.application.dto.AuthenticationRequest;
 import com.company.application.dto.AuthenticationResponse;
-import com.company.application.exception.AuthenticationFailedException;
-import com.company.application.security.TokenService;
-import com.company.application.validator.AuthenticationRequestValidator;
+import com.company.application.dto.SecurityProfileResponse;
+import com.company.application.dto.SessionStatusResponse;
+import com.company.application.dto.TokenStatusResponse;
+import com.company.application.dto.ApiResponse;
+import com.company.application.service.SecurityService;
 import javax.servlet.http.HttpServletRequest;
-import org.slf4j.MDC;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,36 +21,35 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/security")
 public class SecurityController {
 
-    private final LdapAuthenticationService ldapAuthenticationService;
-    private final AuthorizationService authorizationService;
-    private final TokenService tokenService;
-    private final AuditService auditService;
-    private final AuthenticationRequestValidator validator;
+    private final SecurityService securityService;
 
-    public SecurityController(LdapAuthenticationService ldapAuthenticationService,
-            AuthorizationService authorizationService,
-            TokenService tokenService,
-            AuditService auditService,
-            AuthenticationRequestValidator validator) {
-        this.ldapAuthenticationService = ldapAuthenticationService;
-        this.authorizationService = authorizationService;
-        this.tokenService = tokenService;
-        this.auditService = auditService;
-        this.validator = validator;
+    public SecurityController(SecurityService securityService) {
+        this.securityService = securityService;
     }
 
     @PostMapping("/authenticate")
     public AuthenticationResponse authenticate(@RequestBody AuthenticationRequest request, HttpServletRequest servletRequest) {
-        if (!validator.isValid(request)
-                || !ldapAuthenticationService.authenticate(request.getUsername(), request.getPassword())
-                || !authorizationService.hasRole(request.getUsername(), SecurityConstants.ROLE_API)) {
-            String username = request == null ? "unknown" : request.getUsername();
-            auditService.record("FAILED_AUTHENTICATION", username, MDC.get("correlationId"));
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
-        String token = tokenService.generateToken(request.getUsername(),
-                authorizationService.rolesFor(request.getUsername()), servletRequest.getHeader("Origin"));
-        auditService.record("API_AUTHENTICATION", request.getUsername(), MDC.get("correlationId"));
-        return new AuthenticationResponse(token, tokenService.expirationSeconds(), "Bearer");
+        return securityService.authenticate(request, servletRequest);
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse logout(HttpServletRequest request) {
+        securityService.logout(request);
+        return new ApiResponse("logout successful");
+    }
+
+    @GetMapping("/token")
+    public TokenStatusResponse token(HttpServletRequest request) {
+        return securityService.tokenStatus(request);
+    }
+
+    @GetMapping("/session")
+    public SessionStatusResponse session(HttpServletRequest request) {
+        return securityService.sessionStatus(request);
+    }
+
+    @GetMapping("/profile")
+    public SecurityProfileResponse profile(HttpServletRequest request) {
+        return securityService.profile(request);
     }
 }

@@ -22,6 +22,12 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.UNAUTHORIZED, ex.getMessage(), request);
     }
 
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ApiErrorResponse> security(SecurityException ex, HttpServletRequest request) {
+        ApiErrorResponse response = new ApiErrorResponse(ex.getCode().getStatus(), ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(ex.getCode().getStatus()).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> unexpected(Exception ex, HttpServletRequest request) {
         LOGGER.error("Unexpected application exception", ex);

@@ -1,6 +1,8 @@
 package com.company.application.security;
 
 import com.company.application.exception.InvalidTokenException;
+import com.company.application.exception.SecurityErrorCode;
+import com.company.application.exception.SecurityException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -40,24 +42,34 @@ public class TokenService {
 
     public TokenDetails validateToken(String token, String origin) {
         if (!StringUtils.hasText(token)) {
-            throw new InvalidTokenException("Missing bearer token");
+            throw new SecurityException(SecurityErrorCode.INVALID_TOKEN, "Missing bearer token");
         }
         TokenDetails details = tokens.get(token);
         if (details == null) {
-            throw new InvalidTokenException("Invalid bearer token");
+            throw new SecurityException(SecurityErrorCode.INVALID_TOKEN, "Invalid bearer token");
         }
         if (details.getExpiresAt().isBefore(Instant.now(clock))) {
             tokens.remove(token);
-            throw new InvalidTokenException("Expired bearer token");
+            throw new SecurityException(SecurityErrorCode.INVALID_TOKEN, "Expired bearer token");
         }
         if (properties.isSameOriginRequired() && !sameOrigin(details.getOrigin(), origin)) {
-            throw new InvalidTokenException("Token origin is not allowed");
+            throw new SecurityException(SecurityErrorCode.INVALID_TOKEN, "Token origin is not allowed");
         }
         return details;
     }
 
     public void invalidateToken(String token) {
         tokens.remove(token);
+    }
+
+    public TokenDetails findToken(String token) {
+        return validateToken(token, null);
+    }
+
+    public String refreshToken(String token, String origin) {
+        TokenDetails details = validateToken(token, origin);
+        invalidateToken(token);
+        return generateToken(details.getUsername(), details.getRoles(), origin);
     }
 
     public long expirationSeconds() {

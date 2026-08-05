@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.company.application.constants.SecurityConstants;
-import com.company.application.exception.InvalidTokenException;
+import com.company.application.exception.SecurityException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -27,7 +27,7 @@ class TokenServiceTest {
     void rejectsInvalidToken() {
         TokenService service = new TokenService(new TokenProperties(), Clock.systemUTC());
 
-        assertThatThrownBy(() -> service.validateToken("missing", null)).isInstanceOf(InvalidTokenException.class);
+        assertThatThrownBy(() -> service.validateToken("missing", null)).isInstanceOf(SecurityException.class);
     }
 
     @Test
@@ -37,6 +37,6 @@ class TokenServiceTest {
         TokenService service = new TokenService(properties, Clock.systemUTC());
         String token = service.generateToken("svc_api", Arrays.asList(SecurityConstants.ROLE_API), "https://a");
 
-        assertThatThrownBy(() -> service.validateToken(token, "https://b")).isInstanceOf(InvalidTokenException.class);
+        assertThatThrownBy(() -> service.validateToken(token, "https://b")).isInstanceOf(SecurityException.class);
     }
 }

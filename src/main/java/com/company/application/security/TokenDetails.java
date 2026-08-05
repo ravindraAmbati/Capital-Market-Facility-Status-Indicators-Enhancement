@@ -12,12 +12,14 @@ public class TokenDetails {
     private final List<String> roles;
     private final Instant expiresAt;
     private final String origin;
+    private final Instant loginTime;
 
     public TokenDetails(String username, List<String> roles, Instant expiresAt, String origin) {
         this.username = username;
         this.roles = roles;
         this.expiresAt = expiresAt;
         this.origin = origin;
+        this.loginTime = Instant.now();
     }
 
     public String getUsername() {
@@ -34,5 +36,9 @@ public class TokenDetails {
 
     public String getOrigin() {
         return origin;
+    }
+
+    public Instant getLoginTime() {
+        return loginTime;
     }
 }

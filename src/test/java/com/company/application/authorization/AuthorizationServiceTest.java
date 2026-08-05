@@ -21,5 +21,8 @@ class AuthorizationServiceTest {
         assertThat(service.rolesFor("admin1")).containsExactly(SecurityConstants.ROLE_ADMIN);
         assertThat(service.hasRole("svc_api", SecurityConstants.ROLE_API)).isTrue();
         assertThat(service.rolesFor("unknown")).isEmpty();
+        assertThat(service.hasPermission("admin1", "ADMIN")).isTrue();
+        assertThat(service.hasPermission("reader", "WRITE")).isFalse();
+        assertThat(service.isReadOnly("reader")).isTrue();
     }
 }
