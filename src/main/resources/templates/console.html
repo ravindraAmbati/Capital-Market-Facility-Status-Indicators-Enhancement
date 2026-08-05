@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Enterprise Admin Console</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; color: #202124; background: #f7f8fa; }
+        nav { background: #243447; padding: 14px 24px; }
+        nav a { color: #fff; margin-right: 22px; text-decoration: none; font-weight: 600; }
+        main { padding: 32px; }
+        section { background: #fff; border: 1px solid #d9dde3; border-radius: 6px; padding: 24px; max-width: 960px; }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="/admin">Admin</a>
+    <a href="/system">System</a>
+    <a href="/health">Health</a>
+    <a href="/configuration">Configuration</a>
+    <a href="/tokens">Tokens</a>
+    <a href="/audit">Audit</a>
+</nav>
+<main>
+    <section>
+        <h1>Enterprise Admin Console</h1>
+        <p th:text="${#httpServletRequest.requestURI}">Console</p>
+    </section>
+</main>
+</body>
+</html>

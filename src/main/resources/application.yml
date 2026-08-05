@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: enterprise-foundation
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/enterprise_foundation}
+      auto-index-creation: true
+  thymeleaf:
+    cache: false
+
+server:
+  servlet:
+    session:
+      timeout: 30m
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: Enterprise Foundation
+    version: 1.0.0
+    buildTimestamp: ${BUILD_TIMESTAMP:local}
+
+ldap:
+  initialContextFactory: com.sun.jndi.ldap.LdapCtxFactory
+  providerUrl: ldap://localhost:389
+  securityProtocol:
+  securityAuthentication: simple
+  peopleDirectory: ou=people,dc=company,dc=com
+
+security:
+  token:
+    expirationSeconds: 1800
+    sameOriginRequired: false
+  roles:
+    admin:
+      - admin1
+      - admin2
+    api:
+      - svc_api
+    readonly:
+      - user1
+      - user2
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
