@@ -12,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -21,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final LdapAuthenticationProvider authenticationProvider;
     private final BearerTokenAuthenticationFilter bearerTokenAuthenticationFilter;
@@ -30,12 +31,14 @@ public class SecurityConfig {
     private final AuthorizationFilter authorizationFilter;
     private final SecurityExceptionFilter securityExceptionFilter;
 
-    public SecurityConfig(LdapAuthenticationProvider authenticationProvider,
+    public SecurityConfig(
+            LdapAuthenticationProvider authenticationProvider,
             BearerTokenAuthenticationFilter bearerTokenAuthenticationFilter,
             CorrelationIdFilter correlationIdFilter,
             RequestLoggingFilter requestLoggingFilter,
             AuthorizationFilter authorizationFilter,
             SecurityExceptionFilter securityExceptionFilter) {
+
         this.authenticationProvider = authenticationProvider;
         this.bearerTokenAuthenticationFilter = bearerTokenAuthenticationFilter;
         this.correlationIdFilter = correlationIdFilter;
@@ -44,34 +47,88 @@ public class SecurityConfig {
         this.securityExceptionFilter = securityExceptionFilter;
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+        http
+                .csrf()
+                .disable()
+
                 .authenticationProvider(authenticationProvider)
+
                 .authorizeRequests()
-                .antMatchers("/api/security/authenticate", "/login", "/actuator/health", "/actuator/info").permitAll()
-                .antMatchers("/api/security/logout", "/api/security/token", "/api/security/session", "/api/security/profile")
+
+                .antMatchers(
+                        "/api/security/authenticate",
+                        "/login",
+                        "/actuator/health",
+                        "/actuator/info"
+                )
+                .permitAll()
+
+                .antMatchers(
+                        "/api/security/logout",
+                        "/api/security/token",
+                        "/api/security/session",
+                        "/api/security/profile"
+                )
                 .hasAnyRole("ADMIN", "API", "READONLY")
-                .antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").hasAnyRole("ADMIN", "READONLY")
-                .antMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
-                .antMatchers("/api/read/**").hasAnyRole("ADMIN", "READONLY")
-                .antMatchers(HttpMethod.GET, "/api/sample").hasAnyRole("ADMIN", "API", "READONLY")
-                .antMatchers(HttpMethod.POST, "/api/sample").hasAnyRole("ADMIN", "API")
-                .anyRequest().authenticated()
+
+                .antMatchers(
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**"
+                )
+                .hasAnyRole("ADMIN", "READONLY")
+
+                .antMatchers(
+                        "/admin/**",
+                        "/api/admin/**"
+                )
+                .hasRole("ADMIN")
+
+                .antMatchers("/api/read/**")
+                .hasAnyRole("ADMIN", "READONLY")
+
+                .antMatchers(HttpMethod.GET, "/api/sample")
+                .hasAnyRole("ADMIN", "API", "READONLY")
+
+                .antMatchers(HttpMethod.POST, "/api/sample")
+                .hasAnyRole("ADMIN", "API")
+
+                .anyRequest()
+                .authenticated()
+
                 .and()
                 .httpBasic()
-                .and()
-                .logout().disable();
 
-        http.addFilterBefore(securityExceptionFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(bearerTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterAfter(authorizationFilter, BasicAuthenticationFilter.class);
-        http.addFilterAfter(requestLoggingFilter, AuthorizationFilter.class);
-        return http.build();
+                .and()
+                .logout()
+                .disable();
+
+        http.addFilterBefore(
+                securityExceptionFilter,
+                UsernamePasswordAuthenticationFilter.class);
+
+        http.addFilterBefore(
+                correlationIdFilter,
+                UsernamePasswordAuthenticationFilter.class);
+
+        http.addFilterBefore(
+                bearerTokenAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class);
+
+        http.addFilterAfter(
+                authorizationFilter,
+                BasicAuthenticationFilter.class);
+
+        http.addFilterAfter(
+                requestLoggingFilter,
+                AuthorizationFilter.class);
     }
 
-    public void configure(AuthenticationManagerBuilder builder) {
-        builder.authenticationProvider(authenticationProvider);
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(authenticationProvider);
     }
 }
