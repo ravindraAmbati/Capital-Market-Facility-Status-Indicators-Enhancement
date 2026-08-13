@@ -1,136 +1,216 @@
-# Enterprise Foundation
+# CARM Facility Capital Markers (FCM)
 
-Production-oriented Spring Boot 2.7.x foundation application for internal enterprise use. The application provides reusable security, audit, MongoDB infrastructure, Swagger, Actuator, and admin-console foundations so later epics can focus on business functionality.
+## Technology Stack
 
-## Stack
+| Component | Version |
+|-----------|----------|
+| Java | JDK 8 |
+| Spring Boot | 2.3.4.RELEASE |
+| Spring Data MongoDB | 3.0.4.RELEASE |
+| MongoDB Java Driver | 4.0.5 |
+| Maven | 3.x |
+| Swagger | SpringDoc |
+| Thymeleaf | Latest compatible |
+| LDAP | Active Directory |
 
-JDK 8 source compatibility, Spring Boot 2.7.x, Spring Security, Spring MVC, Spring Data MongoDB, Mongo Java Driver, MongoTemplate, MongoRepository, Thymeleaf, Swagger UI, Actuator, Maven, Logback, SLF4J, Jackson, JUnit 5, and Mockito.
+---
 
-## Build And Run
+# Running the Application
 
-```powershell
-mvn clean test
-mvn package
-java -jar target\enterprise-foundation-1.0.0.jar
+```
+mvn clean spring-boot:run
 ```
 
-Useful URLs:
+Application URL
 
-- `http://localhost:8080/swagger-ui.html`
-- `http://localhost:8080/actuator/health`
-- `http://localhost:8080/actuator/info`
-- `http://localhost:8080/admin`
-
-## Security
-
-Session users authenticate against LDAP and configured roles. API users authenticate through the token endpoint.
-
-```http
-POST /api/security/authenticate
-Content-Type: application/json
-
-{"username":"svc_api","password":"password"}
+```
+http://localhost:8080
 ```
 
-Successful API authentication returns:
+Swagger
 
-```json
-{
-  "token": "...",
-  "expiresIn": 1800,
-  "tokenType": "Bearer"
-}
+```
+http://localhost:8080/swagger-ui.html
 ```
 
-Send API tokens as:
+Health Check
 
-```http
-Authorization: Bearer <token>
+```
+http://localhost:8080/actuator/health
 ```
 
-Security endpoints:
+---
 
-- `POST /login`
-- `POST /logout`
-- `POST /api/security/authenticate`
-- `POST /api/security/logout`
-- `GET /api/security/token`
-- `GET /api/security/session`
-- `GET /api/security/profile`
+# MongoDB Configuration
 
-Security roles are configured in `application.yml` under `security.roles`. Users are not hardcoded.
+MongoDB connection is configured using Spring Boot standard property.
 
-## MongoDB
-
-MongoDB infrastructure is fully self-initializing at application startup.
-
-Configuration lives under `mongodb:` in `application.yml`:
-
-- Credentials and authentication database
-- Target database
-- SSL settings
-- Connect and socket timeouts
-- One or more server addresses
-- Logical collection-name mapping
-
-Startup initialization performs:
-
-- Mongo connectivity validation
-- Database accessibility validation
-- Idempotent collection creation
-- Idempotent index initialization
-- Versioned reference-data loading
-- Database version tracking in `applicationVersion`
-- Startup status reporting through Actuator health
-
-Reference data is stored in:
-
-```text
-src/main/resources/reference-data/<version>/*.json
+```
+spring.data.mongodb.uri
 ```
 
-Each file declares a target collection, key field, and records. Previously applied versions are skipped automatically.
+Example
 
-Example:
-
-```json
-{
-  "collection": "applicationConfiguration",
-  "keyField": "code",
-  "records": [
-    {
-      "code": "ROLE_ADMIN",
-      "description": "Administrator role"
-    }
-  ]
-}
+```
+mongodb://username:password@host1:27017,host2:27017,host3:27017,host4:27017/carm_fcm?replicaSet=rs0&authSource=admin&ssl=true
 ```
 
-## Health
+Collections are configured separately.
 
-`/actuator/health` includes Mongo startup details:
-
-- Mongo status
-- Database name
-- Initialized collections
-- Reference-data version
-- Startup status
-
-## Sample APIs
-
-- `GET /api/sample`
-- `POST /api/sample`
-- `GET /api/admin/sample`
-- `GET /api/read/sample`
-
-These endpoints validate controller-service-repository wiring and security enforcement.
-
-## Testing
-
-Run:
-
-```powershell
-mvn test
+```
+mongodb:
+  collections:
 ```
 
-The test suite covers security services, token handling, LDAP flow orchestration, filters, audit, exception handling, Mongo startup validation, collection initialization, version comparison, reference-data JSON parsing, and database version management.
+This allows changing collection names without changing Java code.
+
+---
+
+# Encrypting MongoDB Credentials
+
+The application uses **Jasypt** to encrypt sensitive properties.
+
+Dependency
+
+```xml
+<dependency>
+    <groupId>com.github.ulisesbocchio</groupId>
+    <artifactId>jasypt-spring-boot-starter</artifactId>
+    <version>3.0.5</version>
+</dependency>
+```
+
+---
+
+## Generate Encryption Password
+
+Choose a strong encryption password.
+
+Example
+
+```
+FacilityCapitalMarkers@2026
+```
+
+Do **NOT** commit this password to GitHub.
+
+---
+
+## Encrypt MongoDB URI
+
+Plain Text
+
+```
+mongodb://username:password@host1:27017,host2:27017,host3:27017,host4:27017/carm_fcm?replicaSet=rs0&authSource=admin&ssl=true
+```
+
+Encrypt using Jasypt CLI or utility.
+
+Example Output
+
+```
+QJ8as8df8A7sd89asd9asd89asd==
+```
+
+Update application.yml
+
+```yaml
+spring:
+  data:
+    mongodb:
+      uri: ENC(QJ8as8df8A7sd89asd9asd89asd==)
+```
+
+---
+
+# Providing Encryption Password
+
+## IntelliJ
+
+VM Options
+
+```
+-Djasypt.encryptor.password=FacilityCapitalMarkers@2026
+```
+
+---
+
+## Windows
+
+```
+set JASYPT_ENCRYPTOR_PASSWORD=FacilityCapitalMarkers@2026
+```
+
+---
+
+## Linux
+
+```
+export JASYPT_ENCRYPTOR_PASSWORD=FacilityCapitalMarkers@2026
+```
+
+---
+
+## Kubernetes
+
+Use Secret
+
+```
+JASYPT_ENCRYPTOR_PASSWORD
+```
+
+---
+
+# Decryption
+
+No Java code is required.
+
+During application startup,
+
+```
+ENC(...)
+```
+
+is automatically decrypted by Jasypt before Spring creates the MongoDB connection.
+
+---
+
+# Collections
+
+Current Collections
+
+| Collection |
+|------------|
+| facilityCapitalMarkers |
+| facilityCapitalMarkersDecisionHistory |
+| creditApplicationCapitalMarkersReport |
+| applicationAuditLog |
+
+Collections are **NOT** automatically created.
+
+Indexes are **NOT** automatically created.
+
+```
+spring.data.mongodb.auto-index-creation=false
+```
+
+---
+
+# Security Roles
+
+| Role | Service Account |
+|------|-----------------|
+| Admin | sa-svc-carm-fcm-admin |
+| API | sa-svc-carm-fcm-api |
+| Audit | sa-svc-carm-fcm-audit |
+| IT Support | sa-svc-carm-fcm-itsup |
+
+---
+
+# Notes
+
+- Never commit plain text credentials.
+- Never commit encryption passwords.
+- Store the Jasypt encryption password outside the application.
+- Use different encrypted MongoDB URIs for DEV, SIT, UAT and PROD.
+- Keep collection names configurable through `application.yml`.
