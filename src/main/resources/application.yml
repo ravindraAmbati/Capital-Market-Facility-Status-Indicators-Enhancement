@@ -2,9 +2,24 @@ spring:
   application:
     name: carm-facility-capital-markers
   data:
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/enterprise_foundation}
-      auto-index-creation: true
+    ################################################################################
+    # MongoDB Configuration
+    ################################################################################
+    mongo:
+      hosts:
+        - mongodb-server01.company.com:27017
+        - mongodb-server02.company.com:27017
+        - mongodb-server03.company.com:27017
+        - mongodb-server04.company.com:27017
+      database: carm_fcm
+      username: ENC(xxxxxxxxxxxxxxxxxxxxx)
+      password: ENC(xxxxxxxxxxxxxxxxxxxxx)
+      authenticationDatabase: admin
+      replicaSet: rs0
+      sslEnabled: true
+      connectionTimeout: 10000
+      socketTimeout: 30000
+      auto-index-creation: false
   thymeleaf:
     cache: false
 
