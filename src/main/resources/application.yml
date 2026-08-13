@@ -104,6 +104,7 @@ mongodb:
     facilityCapitalMarkersDecisionHistory: facilityCapitalMarkersDecisionHistory
     creditApplicationCapitalMarkersReport: creditApplicationCapitalMarkersReport
     applicationAuditLog: applicationAuditLog
+    referenceDataMappings: referenceDataMappings
 
 ################################################################################
 # Swagger
