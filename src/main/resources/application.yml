@@ -83,16 +83,16 @@ security:
 
   roles:
     admin:
-      - sa-svc-carm-fcm-admin
+      - SA-SVC-carm-admin
 
     api:
-      - sa-svc-carm-fcm-api
+      - SA-SVC-carm-api
 
     audit:
-      - sa-svc-carm-fcm-audit
+      - SA-SVC-carm-audit
 
     itsup:
-      - sa-svc-carm-fcm-itsup
+      - SA-SVC-carm-itsup
 
 ################################################################################
 # MongoDB Collections
