@@ -1,99 +1,242 @@
+################################################################################
+# Spring Boot
+################################################################################
+
 spring:
+
   application:
     name: carm-facility-capital-markers
-  data:
-    ################################################################################
-    # MongoDB Configuration
-    ################################################################################
-    mongo:
-      hosts:
-        - mongodb-server01.company.com:27017
-        - mongodb-server02.company.com:27017
-        - mongodb-server03.company.com:27017
-        - mongodb-server04.company.com:27017
-      database: carm_fcm
-      username: ENC(xxxxxxxxxxxxxxxxxxxxx)
-      password: ENC(xxxxxxxxxxxxxxxxxxxxx)
-      authenticationDatabase: admin
-      replicaSet: rs0
-      sslEnabled: true
-      connectionTimeout: 10000
-      socketTimeout: 30000
-      auto-index-creation: false
+
   thymeleaf:
     cache: false
 
+################################################################################
+# Server
+################################################################################
+
 server:
+
+  port: 8080
+
   servlet:
+
+    context-path: /
+
     session:
       timeout: 30m
 
+################################################################################
+# Management
+################################################################################
+
 management:
+
   endpoints:
+
     web:
+
       exposure:
-        include: health,info
+
+        include:
+          - health
+          - info
+
   endpoint:
+
     health:
+
       show-details: always
+
   info:
+
     env:
+
       enabled: true
 
+################################################################################
+# Application Information
+################################################################################
+
 info:
+
   app:
-    name: carm-facility-capital-markers
+
+    name: CARM Facility Capital Markers
+
     version: 2026.08
-    buildTimestamp: ${BUILD_TIMESTAMP:local}
+
+    buildTimestamp: ${BUILD_TIMESTAMP:LOCAL}
+
+################################################################################
+# Application Configuration
+################################################################################
+
+app:
+
+  support:
+
+    email: support@company.com
+
+  ui:
+
+    applicationName: CARM Facility Capital Markers
+
+    companyName: Standard Bank
+
+    loginDisclaimer: >
+      This system is restricted to authorized users only.
+      Unauthorized access is prohibited and all activities are monitored.
+
+  role:
+
+    admin:
+
+      - sa-svc-carm-admin
+
+    api:
+
+      - sa-svc-carm-api
+
+    audit:
+
+      - sa-svc-carm-audit
+
+    itsup:
+
+      - sa-svc-carm-itsup
+
+################################################################################
+# LDAP
+################################################################################
 
 ldap:
+
   initialContextFactory: com.sun.jndi.ldap.LdapCtxFactory
+
   providerUrl: ldap://localhost:389
-  securityProtocol:
+
   securityAuthentication: simple
+
+  securityProtocol:
+
   peopleDirectory: ou=people,dc=company,dc=com
+
   connectionTimeoutMillis: 5000
+
   readTimeoutMillis: 5000
 
-security:
-  authenticationMode: ldap
-  passwordPolicy:
-    enabled: false
-  token:
-    expirationSeconds: 1800
-    refreshWindowSeconds: 300
-    sameOriginRequired: false
-  roles:
-    admin:
-      - admin1
-      - admin2
-    api:
-      - svc_api
-    readonly:
-      - user1
-      - user2
+################################################################################
+# Authentication
+################################################################################
 
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
+authentication:
+
+  mode: LDAP
+
+  passwordPolicyEnabled: false
+
+################################################################################
+# Token Configuration
+################################################################################
+
+token:
+
+  expirationSeconds: 1800
+
+  refreshWindowSeconds: 300
+
+  sameOriginRequired: false
+
+################################################################################
+# MongoDB
+################################################################################
 
 mongodb:
-  username:
-  password:
-  authenticationDatabase: admin
-  database: enterprise_foundation
-  sslEnabled: false
-  sslInvalidHostnameAllowed: false
+
+  uri: ENC(XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
+
+  database: carm_fcm
+
+  autoIndexCreation: false
+
   connectTimeout: 10000
-  socketTimeout: 10000
-  serverAddresses:
-    - localhost:27017
-  dbCollectionNames:
-    applicationVersion: applicationVersion
-    applicationConfiguration: applicationConfiguration
-    userAuthorization: userAuthorization
-    apiTokens: apiTokens
-    auditTrail: auditRecords
-    schedulerJobs: schedulerJobs
-    schedulerHistory: schedulerHistory
-    sampleCollection: samples
+
+  socketTimeout: 30000
+
+################################################################################
+# Swagger
+################################################################################
+
+springdoc:
+
+  swagger-ui:
+
+    path: /swagger-ui.html
+
+    display-request-duration: true
+
+    operationsSorter: alpha
+
+    tagsSorter: alpha
+
+################################################################################
+# Logging
+################################################################################
+
+logging:
+
+  level:
+
+    root: INFO
+
+    org.springframework: INFO
+
+    org.mongodb.driver: INFO
+
+    com.sab.carm.fcm: DEBUG
+
+################################################################################
+# Actuator
+################################################################################
+
+health:
+
+  mongodb:
+
+    enabled: true
+
+################################################################################
+# Feature Flags
+################################################################################
+
+feature:
+
+  mongodb:
+
+    enabled: true
+
+  ldap:
+
+    enabled: true
+
+  swagger:
+
+    enabled: true
+
+  audit:
+
+    enabled: true
+
+################################################################################
+# Future Configurations
+################################################################################
+
+integration:
+
+  carm:
+
+    enabled: false
+
+  kong:
+
+    enabled: false
