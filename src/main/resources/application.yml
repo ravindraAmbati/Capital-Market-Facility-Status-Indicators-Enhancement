@@ -1,7 +1,3 @@
-################################################################################
-# Spring Boot
-################################################################################
-
 spring:
   application:
     name: carm-facility-capital-markers
@@ -83,27 +79,35 @@ security:
 
   roles:
     admin:
-      - SA-SVC-carm-admin
+      - sa-svc-carm-fcm-admin
 
     api:
-      - SA-SVC-carm-api
+      - sa-svc-carm-fcm-api
 
     audit:
-      - SA-SVC-carm-audit
+      - sa-svc-carm-fcm-audit
 
     itsup:
-      - SA-SVC-carm-itsup
-
-################################################################################
-# MongoDB Collections
-################################################################################
+      - sa-svc-carm-fcm-itsup
 
 mongodb:
-  collections:
+
+  validateConnection: false
+
+  initializeCollections: false
+
+  initializeIndexes: false
+
+  dbCollectionNames:
+
     facilityCapitalMarkers: facilityCapitalMarkers
+
     facilityCapitalMarkersDecisionHistory: facilityCapitalMarkersDecisionHistory
+
     creditApplicationCapitalMarkersReport: creditApplicationCapitalMarkersReport
+
     applicationAuditLog: applicationAuditLog
+
     referenceDataMappings: referenceDataMappings
 
 ################################################################################

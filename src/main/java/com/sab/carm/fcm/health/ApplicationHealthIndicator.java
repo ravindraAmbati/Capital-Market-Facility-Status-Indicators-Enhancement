@@ -1,33 +1,74 @@
 package com.sab.carm.fcm.health;
 
+import com.mongodb.client.MongoClient;
 import com.sab.carm.fcm.mongo.MongoProperties;
-import com.sab.carm.fcm.mongo.MongoStartupStatus;
+import org.bson.Document;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
-/**
- * Provides a simple application health contribution.
- */
 @Component
 public class ApplicationHealthIndicator implements HealthIndicator {
 
-    private final MongoProperties mongoProperties;
-    private final MongoStartupStatus mongoStartupStatus;
+    private final MongoClient mongoClient;
 
-    public ApplicationHealthIndicator(MongoProperties mongoProperties, MongoStartupStatus mongoStartupStatus) {
+    private final MongoProperties mongoProperties;
+
+    public ApplicationHealthIndicator(
+            MongoClient mongoClient,
+            MongoProperties mongoProperties) {
+
+        this.mongoClient = mongoClient;
         this.mongoProperties = mongoProperties;
-        this.mongoStartupStatus = mongoStartupStatus;
     }
 
     @Override
     public Health health() {
-        return Health.up()
-                .withDetail("framework", "ready")
-                .withDetail("databaseName", mongoProperties.getDatabase())
-                .withDetail("collectionsInitialized", mongoStartupStatus.getInitializedCollections())
-                .withDetail("referenceDataVersion", mongoStartupStatus.getReferenceDataVersion())
-                .withDetail("startupStatus", mongoStartupStatus.isSuccessful() ? "SUCCESS" : "STARTING")
-                .build();
+
+        Health.Builder builder = Health.up();
+
+        builder.withDetail("application", "UP");
+
+        /*
+         * MongoDB Health
+         */
+        if (!mongoProperties.isValidateConnection()) {
+
+            builder.withDetail(
+                    "mongodb",
+                    "Validation Disabled");
+
+            return builder.build();
+        }
+
+        try {
+
+            mongoClient
+                    .getDatabase("admin")
+                    .runCommand(new Document("ping", 1));
+
+            builder.withDetail(
+                    "mongodb",
+                    "UP");
+
+        } catch (Exception ex) {
+
+            builder.withDetail(
+                    "mongodb",
+                    "DOWN");
+
+            builder.withDetail(
+                    "mongodbError",
+                    ex.getMessage());
+
+            /*
+             * We intentionally DO NOT return Health.down().
+             *
+             * MongoDB may be temporarily unavailable during
+             * development or maintenance windows.
+             */
+        }
+
+        return builder.build();
     }
 }

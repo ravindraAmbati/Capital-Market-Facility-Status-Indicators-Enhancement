@@ -1,104 +1,102 @@
 package com.sab.carm.fcm.mongo;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
-
-/**
- * External MongoDB infrastructure configuration.
- */
-@Configuration
-@ConfigurationProperties(prefix = "mongo")
+@Component
+@ConfigurationProperties(prefix = "mongodb")
 public class MongoProperties {
 
-    private List<String> hosts;
+    private boolean validateConnection;
 
-    private String database;
+    private boolean initializeCollections;
 
-    private String username;
+    private boolean initializeIndexes;
 
-    private String password;
+    private DbCollectionNames dbCollectionNames = new DbCollectionNames();
 
-    private String authenticationDatabase;
-
-    private String replicaSet;
-
-    private boolean sslEnabled;
-
-    private int connectionTimeout;
-
-    private int socketTimeout;
-
-    public int getSocketTimeout() {
-        return socketTimeout;
+    public boolean isValidateConnection() {
+        return validateConnection;
     }
 
-    public void setSocketTimeout(int socketTimeout) {
-        this.socketTimeout = socketTimeout;
+    public void setValidateConnection(boolean validateConnection) {
+        this.validateConnection = validateConnection;
     }
 
-    public int getConnectionTimeout() {
-        return connectionTimeout;
+    public boolean isInitializeCollections() {
+        return initializeCollections;
     }
 
-    public void setConnectionTimeout(int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
+    public void setInitializeCollections(boolean initializeCollections) {
+        this.initializeCollections = initializeCollections;
     }
 
-    public boolean isSslEnabled() {
-        return sslEnabled;
+    public boolean isInitializeIndexes() {
+        return initializeIndexes;
     }
 
-    public void setSslEnabled(boolean sslEnabled) {
-        this.sslEnabled = sslEnabled;
+    public void setInitializeIndexes(boolean initializeIndexes) {
+        this.initializeIndexes = initializeIndexes;
     }
 
-    public String getReplicaSet() {
-        return replicaSet;
+    public DbCollectionNames getDbCollectionNames() {
+        return dbCollectionNames;
     }
 
-    public void setReplicaSet(String replicaSet) {
-        this.replicaSet = replicaSet;
+    public void setDbCollectionNames(DbCollectionNames dbCollectionNames) {
+        this.dbCollectionNames = dbCollectionNames;
     }
 
-    public String getAuthenticationDatabase() {
-        return authenticationDatabase;
-    }
+    public static class DbCollectionNames {
 
-    public void setAuthenticationDatabase(String authenticationDatabase) {
-        this.authenticationDatabase = authenticationDatabase;
-    }
+        private String facilityCapitalMarkers;
 
-    public String getPassword() {
-        return password;
-    }
+        private String facilityCapitalMarkersDecisionHistory;
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+        private String creditApplicationCapitalMarkersReport;
 
-    public String getUsername() {
-        return username;
-    }
+        private String applicationAuditLog;
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+        private String referenceDataMappings;
 
-    public String getDatabase() {
-        return database;
-    }
+        public String getFacilityCapitalMarkers() {
+            return facilityCapitalMarkers;
+        }
 
-    public void setDatabase(String database) {
-        this.database = database;
-    }
+        public void setFacilityCapitalMarkers(String facilityCapitalMarkers) {
+            this.facilityCapitalMarkers = facilityCapitalMarkers;
+        }
 
-    public List<String> getHosts() {
-        return hosts;
-    }
+        public String getFacilityCapitalMarkersDecisionHistory() {
+            return facilityCapitalMarkersDecisionHistory;
+        }
 
-    public void setHosts(List<String> hosts) {
-        this.hosts = hosts;
+        public void setFacilityCapitalMarkersDecisionHistory(String facilityCapitalMarkersDecisionHistory) {
+            this.facilityCapitalMarkersDecisionHistory = facilityCapitalMarkersDecisionHistory;
+        }
+
+        public String getCreditApplicationCapitalMarkersReport() {
+            return creditApplicationCapitalMarkersReport;
+        }
+
+        public void setCreditApplicationCapitalMarkersReport(String creditApplicationCapitalMarkersReport) {
+            this.creditApplicationCapitalMarkersReport = creditApplicationCapitalMarkersReport;
+        }
+
+        public String getApplicationAuditLog() {
+            return applicationAuditLog;
+        }
+
+        public void setApplicationAuditLog(String applicationAuditLog) {
+            this.applicationAuditLog = applicationAuditLog;
+        }
+
+        public String getReferenceDataMappings() {
+            return referenceDataMappings;
+        }
+
+        public void setReferenceDataMappings(String referenceDataMappings) {
+            this.referenceDataMappings = referenceDataMappings;
+        }
     }
 }
