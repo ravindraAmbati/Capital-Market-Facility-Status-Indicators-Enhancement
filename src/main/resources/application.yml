@@ -1,6 +1,6 @@
 spring:
   application:
-    name: enterprise-foundation
+    name: carm-facility-capital-markers
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/enterprise_foundation}
@@ -27,8 +27,8 @@ management:
 
 info:
   app:
-    name: Enterprise Foundation
-    version: 1.0.0
+    name: carm-facility-capital-markers
+    version: 2026.08
     buildTimestamp: ${BUILD_TIMESTAMP:local}
 
 ldap:
@@ -78,7 +78,7 @@ mongodb:
     applicationConfiguration: applicationConfiguration
     userAuthorization: userAuthorization
     apiTokens: apiTokens
-    auditTrail: audit_records
+    auditTrail: auditRecords
     schedulerJobs: schedulerJobs
     schedulerHistory: schedulerHistory
     sampleCollection: samples
