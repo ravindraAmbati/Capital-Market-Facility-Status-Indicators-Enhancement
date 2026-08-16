@@ -1,5 +1,6 @@
 package com.sab.carm.fcm.service;
 
+import com.sab.carm.fcm.audit.AuditEvent;
 import com.sab.carm.fcm.audit.AuditService;
 import com.sab.carm.fcm.authentication.LdapAuthenticationResult;
 import com.sab.carm.fcm.authentication.LdapAuthenticationService;
@@ -56,13 +57,15 @@ public class SecurityService {
             HttpServletRequest servletRequest) {
 
         String username = usernameOf(request);
+        String clientIp = clientIp(servletRequest);
 
-        authenticateWithLdap(request, username);
+        authenticateWithLdap(request, username, clientIp);
 
         if (!authorizationService.isApiUser(username)) {
 
             auditFailure(
                     username,
+                    clientIp,
                     "USER_NOT_AUTHORIZED_FOR_API");
 
             throw new AuthenticationFailedException(
@@ -76,9 +79,11 @@ public class SecurityService {
                         servletRequest.getHeader("Origin"));
 
         auditService.record(
-                "TOKEN_GENERATED",
-                username,
-                MDC.get("correlationId"));
+                AuditEvent.tokenGenerated(
+                        username,
+                        "API",
+                        clientIp,
+                        MDC.get("correlationId")));
 
         return new AuthenticationResponse(
                 token,
@@ -99,13 +104,15 @@ public class SecurityService {
             HttpServletRequest servletRequest) {
 
         String username = usernameOf(request);
+        String clientIp = clientIp(servletRequest);
 
-        authenticateWithLdap(request, username);
+        authenticateWithLdap(request, username, clientIp);
 
         if (!isLoginAuthorized(username)) {
 
             auditFailure(
                     username,
+                    clientIp,
                     "USER_NOT_AUTHORIZED_FOR_LOGIN");
 
             throw new AuthenticationFailedException(
@@ -131,9 +138,11 @@ public class SecurityService {
         servletRequest.getSession(true);
 
         auditService.record(
-                "LOGIN_SUCCESS",
-                username,
-                MDC.get("correlationId"));
+                AuditEvent.loginSuccess(
+                        username,
+                        "API",
+                        clientIp,
+                        MDC.get("correlationId")));
     }
 
     /**
@@ -142,12 +151,13 @@ public class SecurityService {
      */
     private LdapAuthenticationResult authenticateWithLdap(
             AuthenticationRequest request,
-            String username) {
+            String username, String clientIp) {
 
         if (!validator.isValid(request)) {
 
             auditFailure(
                     username,
+                    clientIp,
                     "INVALID_REQUEST");
 
             throw new AuthenticationFailedException(
@@ -160,9 +170,9 @@ public class SecurityService {
                         request.getPassword());
 
         if (!result.isSuccessful()) {
-
             auditFailure(
                     username,
+                    clientIp,
                     result.getStatus().name());
 
             throw new AuthenticationFailedException(
@@ -198,18 +208,22 @@ public class SecurityService {
      */
     private void auditFailure(
             String username,
+            String clientIp,
             String reason) {
 
         auditService.record(
-                "LOGIN_FAILURE",
-                username,
-                MDC.get("correlationId"));
+                AuditEvent.loginFailure(
+                        username,
+                        clientIp,
+                        MDC.get("correlationId"),
+                        reason));
     }
 
     public void logout(HttpServletRequest request) {
 
         CurrentUser user =
                 securityContextService.currentUser();
+        String clientIp = clientIp(request);
 
         String token =
                 securityContextService.bearerToken(request);
@@ -227,10 +241,11 @@ public class SecurityService {
 
         SecurityContextHolder.clearContext();
 
-        auditService.record(
-                "LOGOUT",
+        auditService.record(AuditEvent.logout(
                 user.getUsername(),
-                MDC.get("correlationId"));
+                "API",
+                clientIp,
+                MDC.get("correlationId")));
     }
 
     public TokenStatusResponse tokenStatus(
@@ -292,5 +307,21 @@ public class SecurityService {
                 Instant.now(),
                 tokenExpiry,
                 sessionExpiry);
+    }
+    private String clientIp(
+            HttpServletRequest request) {
+
+        String forwardedFor =
+                request.getHeader("X-Forwarded-For");
+
+        if (forwardedFor != null
+                && !forwardedFor.trim().isEmpty()) {
+
+            return forwardedFor
+                    .split(",")[0]
+                    .trim();
+        }
+
+        return request.getRemoteAddr();
     }
 }

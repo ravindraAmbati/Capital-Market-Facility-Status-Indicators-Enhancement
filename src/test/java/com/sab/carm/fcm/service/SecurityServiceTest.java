@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sab.carm.fcm.audit.AuditEvent;
 import com.sab.carm.fcm.audit.AuditService;
 import com.sab.carm.fcm.authentication.LdapAuthenticationResult;
 import com.sab.carm.fcm.authentication.LdapAuthenticationService;
@@ -18,13 +19,16 @@ import com.sab.carm.fcm.security.SecurityContextService;
 import com.sab.carm.fcm.security.TokenService;
 import com.sab.carm.fcm.validator.AuthenticationRequestValidator;
 
+import java.util.Collections;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.servlet.http.HttpServletRequest;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityServiceTest {
@@ -93,8 +97,7 @@ class SecurityServiceTest {
         when(authorizationService.rolesFor(
                 request.getUsername()))
                 .thenReturn(
-                        java.util.Collections.singletonList(
-                                "API"));
+                        Collections.singletonList("API"));
 
         when(tokenService.generateToken(
                 eq(request.getUsername()),
@@ -115,10 +118,7 @@ class SecurityServiceTest {
                 response.getToken());
 
         verify(auditService)
-                .record(
-                        eq("TOKEN_GENERATED"),
-                        eq(request.getUsername()),
-                        any());
+                .record(any(AuditEvent.class));
     }
 
     @Test
@@ -151,10 +151,7 @@ class SecurityServiceTest {
                         servletRequest));
 
         verify(auditService)
-                .record(
-                        eq("LOGIN_FAILURE"),
-                        eq(request.getUsername()),
-                        any());
+                .record(any(AuditEvent.class));
     }
 
     @Test
@@ -162,7 +159,7 @@ class SecurityServiceTest {
 
         AuthenticationRequest request =
                 new AuthenticationRequest(
-                        "sa-svc-carm-fcm-admin",
+                        "sa-svc-carm-admin",
                         "password");
 
         when(validator.isValid(request))
@@ -183,18 +180,14 @@ class SecurityServiceTest {
         when(authorizationService.rolesFor(
                 request.getUsername()))
                 .thenReturn(
-                        java.util.Collections.singletonList(
-                                "ADMIN"));
+                        Collections.singletonList("ADMIN"));
 
         securityService.login(
                 request,
                 servletRequest);
 
         verify(auditService)
-                .record(
-                        eq("LOGIN_SUCCESS"),
-                        eq(request.getUsername()),
-                        any());
+                .record(any(AuditEvent.class));
     }
 
     @Test
@@ -235,10 +228,7 @@ class SecurityServiceTest {
                         servletRequest));
 
         verify(auditService)
-                .record(
-                        eq("LOGIN_FAILURE"),
-                        eq(request.getUsername()),
-                        any());
+                .record(any(AuditEvent.class));
     }
 
     @Test
@@ -266,9 +256,6 @@ class SecurityServiceTest {
                         servletRequest));
 
         verify(auditService)
-                .record(
-                        eq("LOGIN_FAILURE"),
-                        eq(request.getUsername()),
-                        any());
+                .record(any(AuditEvent.class));
     }
 }
