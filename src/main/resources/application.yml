@@ -79,16 +79,16 @@ security:
 
   roles:
     admin:
-      - sa-svc-carm-fcm-admin
+      - sa-svc-carm-admin
 
     api:
-      - sa-svc-carm-fcm-api
+      - sa-svc-carm-api
 
     audit:
-      - sa-svc-carm-fcm-audit
+      - sa-svc-carm-audit
 
     itsup:
-      - sa-svc-carm-fcm-itsup
+      - sa-svc-carm-itsup
 
 mongodb:
 

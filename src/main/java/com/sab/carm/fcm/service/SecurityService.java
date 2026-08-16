@@ -3,27 +3,20 @@ package com.sab.carm.fcm.service;
 import com.sab.carm.fcm.audit.AuditService;
 import com.sab.carm.fcm.authentication.LdapAuthenticationService;
 import com.sab.carm.fcm.authorization.AuthorizationService;
-import com.sab.carm.fcm.dto.AuthenticationRequest;
-import com.sab.carm.fcm.dto.AuthenticationResponse;
-import com.sab.carm.fcm.dto.SecurityProfileResponse;
-import com.sab.carm.fcm.dto.SessionStatusResponse;
-import com.sab.carm.fcm.dto.TokenStatusResponse;
+import com.sab.carm.fcm.dto.*;
 import com.sab.carm.fcm.exception.AuthenticationFailedException;
-import com.sab.carm.fcm.security.CurrentSession;
-import com.sab.carm.fcm.security.CurrentToken;
-import com.sab.carm.fcm.security.CurrentUser;
-import com.sab.carm.fcm.security.SecurityContextService;
-import com.sab.carm.fcm.security.TokenService;
+import com.sab.carm.fcm.security.*;
 import com.sab.carm.fcm.validator.AuthenticationRequestValidator;
-import java.time.Instant;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.time.Instant;
+import java.util.stream.Collectors;
 
 /**
  * Coordinates security APIs and security audit events.
@@ -67,7 +60,7 @@ public class SecurityService {
         String username = request == null ? "unknown" : request.getUsername();
         if (!validator.isValid(request)
                 || !ldapAuthenticationService.authenticate(request.getUsername(), request.getPassword())
-                || (!authorizationService.isAdmin(request.getUsername()) && !authorizationService.isReadOnly(request.getUsername()))) {
+                || (!authorizationService.isAdmin(request.getUsername()) && !authorizationService.isAuditUser(request.getUsername()) && !authorizationService.isItsupUser(request.getUsername()))) {
             auditService.record("LOGIN_FAILURE", username, MDC.get("correlationId"));
             throw new AuthenticationFailedException("Invalid credentials");
         }

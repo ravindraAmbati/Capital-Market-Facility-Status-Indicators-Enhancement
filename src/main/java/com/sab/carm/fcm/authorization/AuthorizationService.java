@@ -19,34 +19,34 @@ public class AuthorizationService {
     }
 
     public List<String> rolesFor(String username) {
+
         List<String> roles = new ArrayList<>();
-        if (properties.getAdmin().contains(username)) {
+
+        if (contains(properties.getAdmin(), username)) {
             roles.add(SecurityConstants.ROLE_ADMIN);
         }
-        if (properties.getApi().contains(username)) {
+
+        if (contains(properties.getApi(), username)) {
             roles.add(SecurityConstants.ROLE_API);
         }
-        if (properties.getReadonly().contains(username)) {
-            roles.add(SecurityConstants.ROLE_READONLY);
+
+        if (contains(properties.getAudit(), username)) {
+            roles.add(SecurityConstants.ROLE_AUDIT);
         }
+
+        if (contains(properties.getItsup(), username)) {
+            roles.add(SecurityConstants.ROLE_ITSUP);
+        }
+
         return roles;
+    }
+
+    public boolean isAuthorized(String username) {
+        return !rolesFor(username).isEmpty();
     }
 
     public boolean hasRole(String username, String role) {
         return rolesFor(username).contains(role);
-    }
-
-    public boolean hasPermission(String username, String permission) {
-        if ("WRITE".equalsIgnoreCase(permission)) {
-            return isAdmin(username) || isApiUser(username);
-        }
-        if ("READ".equalsIgnoreCase(permission)) {
-            return isAdmin(username) || isApiUser(username) || isReadOnly(username);
-        }
-        if ("ADMIN".equalsIgnoreCase(permission)) {
-            return isAdmin(username);
-        }
-        return false;
     }
 
     public boolean isAdmin(String username) {
@@ -57,7 +57,42 @@ public class AuthorizationService {
         return hasRole(username, SecurityConstants.ROLE_API);
     }
 
-    public boolean isReadOnly(String username) {
-        return hasRole(username, SecurityConstants.ROLE_READONLY);
+    public boolean isAuditUser(String username) {
+        return hasRole(username, SecurityConstants.ROLE_AUDIT);
+    }
+
+    public boolean isItsupUser(String username) {
+        return hasRole(username, SecurityConstants.ROLE_ITSUP);
+    }
+
+    public boolean hasPermission(String username, String permission) {
+
+        if (SecurityConstants.PERMISSION_READ.equalsIgnoreCase(permission)) {
+            return isAdmin(username)
+                    || isApiUser(username)
+                    || isAuditUser(username)
+                    || isItsupUser(username);
+        }
+
+        if (SecurityConstants.PERMISSION_WRITE.equalsIgnoreCase(permission)) {
+            return isAdmin(username)
+                    || isApiUser(username);
+        }
+
+        if (SecurityConstants.PERMISSION_ADMIN.equalsIgnoreCase(permission)) {
+            return isAdmin(username);
+        }
+
+        return false;
+    }
+
+    private boolean contains(List<String> users, String username) {
+
+        if (username == null || users == null) {
+            return false;
+        }
+
+        return users.stream()
+                .anyMatch(username::equalsIgnoreCase);
     }
 }
