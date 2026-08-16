@@ -200,10 +200,10 @@ spring.data.mongodb.auto-index-creation=false
 
 | Role | Service Account |
 |------|-----------------|
-| Admin | sa-svc-carm-fcm-admin |
-| API | sa-svc-carm-fcm-api |
-| Audit | sa-svc-carm-fcm-audit |
-| IT Support | sa-svc-carm-fcm-itsup |
+| Admin | sa-svc-carm-admin |
+| API | sa-svc-carm-api |
+| Audit | sa-svc-carm-audit |
+| IT Support | sa-svc-carm-itsup |
 
 ---
 
