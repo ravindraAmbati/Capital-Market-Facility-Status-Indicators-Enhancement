@@ -3,6 +3,8 @@ package com.sab.carm.fcm.security;
 import com.sab.carm.fcm.audit.AuditEvent;
 import com.sab.carm.fcm.audit.AuditService;
 import javax.servlet.http.HttpServletRequest;
+
+import com.sab.carm.fcm.util.SecurityUtil;
 import org.slf4j.MDC;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
@@ -45,7 +47,7 @@ public class SecurityAuditEventListener {
                 AuditEvent.loginSuccess(
                         username,
                         resolveRole(event.getAuthentication()),
-                        resolveClientIp(),
+                        SecurityUtil.currentClientIp(request),
                         MDC.get("correlationId")));
     }
 
@@ -66,7 +68,7 @@ public class SecurityAuditEventListener {
         auditService.record(
                 AuditEvent.loginFailure(
                         username,
-                        resolveClientIp(),
+                        SecurityUtil.currentClientIp(request),
                         MDC.get("correlationId"),
                         reason));
     }
@@ -105,21 +107,5 @@ public class SecurityAuditEventListener {
                         authority.substring("ROLE_".length()))
                 .findFirst()
                 .orElse(null);
-    }
-
-    private String resolveClientIp() {
-
-        String forwardedFor =
-                request.getHeader("X-Forwarded-For");
-
-        if (forwardedFor != null
-                && !forwardedFor.trim().isEmpty()) {
-
-            return forwardedFor
-                    .split(",")[0]
-                    .trim();
-        }
-
-        return request.getRemoteAddr();
     }
 }

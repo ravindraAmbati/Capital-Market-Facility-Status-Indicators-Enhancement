@@ -8,6 +8,7 @@ import com.sab.carm.fcm.authorization.AuthorizationService;
 import com.sab.carm.fcm.dto.*;
 import com.sab.carm.fcm.exception.AuthenticationFailedException;
 import com.sab.carm.fcm.security.*;
+import com.sab.carm.fcm.util.SecurityUtil;
 import com.sab.carm.fcm.validator.AuthenticationRequestValidator;
 import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -57,7 +58,7 @@ public class SecurityService {
             HttpServletRequest servletRequest) {
 
         String username = usernameOf(request);
-        String clientIp = clientIp(servletRequest);
+        String clientIp = SecurityUtil.currentClientIp(servletRequest);
 
         authenticateWithLdap(request, username, clientIp);
 
@@ -104,7 +105,7 @@ public class SecurityService {
             HttpServletRequest servletRequest) {
 
         String username = usernameOf(request);
-        String clientIp = clientIp(servletRequest);
+        String clientIp = SecurityUtil.currentClientIp(servletRequest);
 
         authenticateWithLdap(request, username, clientIp);
 
@@ -223,7 +224,7 @@ public class SecurityService {
 
         CurrentUser user =
                 securityContextService.currentUser();
-        String clientIp = clientIp(request);
+        String clientIp = SecurityUtil.currentClientIp(request);
 
         String token =
                 securityContextService.bearerToken(request);
@@ -308,20 +309,5 @@ public class SecurityService {
                 tokenExpiry,
                 sessionExpiry);
     }
-    private String clientIp(
-            HttpServletRequest request) {
 
-        String forwardedFor =
-                request.getHeader("X-Forwarded-For");
-
-        if (forwardedFor != null
-                && !forwardedFor.trim().isEmpty()) {
-
-            return forwardedFor
-                    .split(",")[0]
-                    .trim();
-        }
-
-        return request.getRemoteAddr();
-    }
 }

@@ -6,6 +6,7 @@ import com.sab.carm.fcm.constants.SecurityConstants;
 import com.sab.carm.fcm.exception.SecurityException;
 import com.sab.carm.fcm.security.TokenDetails;
 import com.sab.carm.fcm.security.TokenService;
+import com.sab.carm.fcm.util.SecurityUtil;
 import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -135,25 +136,9 @@ public class BearerTokenAuthenticationFilter
                 AuditEvent.invalidToken(
                         "INVALID_TOKEN",
                         "unknown",
-                        resolveClientIp(request),
+                        SecurityUtil.currentClientIp(request),
                         MDC.get("correlationId"),
                         "INVALID_OR_EXPIRED_TOKEN"));
     }
 
-    private String resolveClientIp(
-            HttpServletRequest request) {
-
-        String forwardedFor =
-                request.getHeader("X-Forwarded-For");
-
-        if (forwardedFor != null
-                && !forwardedFor.trim().isEmpty()) {
-
-            return forwardedFor
-                    .split(",")[0]
-                    .trim();
-        }
-
-        return request.getRemoteAddr();
-    }
 }

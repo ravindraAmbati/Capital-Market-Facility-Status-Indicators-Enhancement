@@ -9,6 +9,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.sab.carm.fcm.util.SecurityUtil;
 import org.slf4j.MDC;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -102,7 +104,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                 resolveUsername();
 
         String clientIp =
-                resolveClientIp(request);
+                SecurityUtil.currentClientIp(request);
 
         auditService.record(
                 AuditEvent.loginFailure(
@@ -125,22 +127,5 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         }
 
         return authentication.getName();
-    }
-
-    private String resolveClientIp(
-            HttpServletRequest request) {
-
-        String forwardedFor =
-                request.getHeader("X-Forwarded-For");
-
-        if (forwardedFor != null
-                && !forwardedFor.trim().isEmpty()) {
-
-            return forwardedFor
-                    .split(",")[0]
-                    .trim();
-        }
-
-        return request.getRemoteAddr();
     }
 }
