@@ -138,10 +138,16 @@ public class SecurityService {
 
         servletRequest.getSession(true);
 
+        String role =
+                authorizationService.rolesFor(username)
+                        .stream()
+                        .findFirst()
+                        .orElse(null);
+
         auditService.record(
                 AuditEvent.loginSuccess(
                         username,
-                        "API",
+                        role,
                         clientIp,
                         MDC.get("correlationId")));
     }
@@ -242,11 +248,20 @@ public class SecurityService {
 
         SecurityContextHolder.clearContext();
 
-        auditService.record(AuditEvent.logout(
-                user.getUsername(),
-                "API",
-                clientIp,
-                MDC.get("correlationId")));
+        String role =
+                user.getRoles() == null
+                        ? null
+                        : user.getRoles()
+                        .stream()
+                        .findFirst()
+                        .orElse(null);
+
+        auditService.record(
+                AuditEvent.logout(
+                        user.getUsername(),
+                        role,
+                        clientIp,
+                        MDC.get("correlationId")));
     }
 
     public TokenStatusResponse tokenStatus(

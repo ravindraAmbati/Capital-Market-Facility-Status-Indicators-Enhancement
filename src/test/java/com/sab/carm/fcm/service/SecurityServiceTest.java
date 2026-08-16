@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -186,8 +187,30 @@ class SecurityServiceTest {
                 request,
                 servletRequest);
 
+        ArgumentCaptor<AuditEvent> captor =
+                ArgumentCaptor.forClass(AuditEvent.class);
+
         verify(auditService)
-                .record(any(AuditEvent.class));
+                .record(captor.capture());
+
+        AuditEvent event =
+                captor.getValue();
+
+        assertEquals(
+                "LOGIN",
+                event.getEventType());
+
+        assertEquals(
+                "SUCCESS",
+                event.getResult());
+
+        assertEquals(
+                "sa-svc-carm-admin",
+                event.getUsername());
+
+        assertEquals(
+                "ADMIN",
+                event.getRole());
     }
 
     @Test
