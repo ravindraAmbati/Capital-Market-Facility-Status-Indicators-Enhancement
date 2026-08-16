@@ -21,8 +21,23 @@ public class LdapConnectionFactory {
         this.properties = properties;
     }
 
-    public DirContext createAnonymousContext() throws NamingException {
-        return new InitialLdapContext(baseEnvironment(), null);
+    public DirContext createSearchContext()
+            throws NamingException {
+
+        Hashtable<String, String> environment =
+                baseEnvironment();
+
+        environment.put(
+                Context.SECURITY_PRINCIPAL,
+                properties.getBindUsername());
+
+        environment.put(
+                Context.SECURITY_CREDENTIALS,
+                properties.getBindPassword());
+
+        return new InitialLdapContext(
+                environment,
+                null);
     }
 
     public DirContext createAuthenticatedContext(String distinguishedName, String password) throws NamingException {

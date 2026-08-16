@@ -15,6 +15,8 @@ public class LdapProperties {
     private String peopleDirectory;
     private int connectionTimeoutMillis = 5000;
     private int readTimeoutMillis = 5000;
+    private String bindUsername;
+    private String bindPassword;
 
     public String getInitialContextFactory() {
         return initialContextFactory;
@@ -70,5 +72,21 @@ public class LdapProperties {
 
     public void setReadTimeoutMillis(int readTimeoutMillis) {
         this.readTimeoutMillis = readTimeoutMillis;
+    }
+
+    public String getBindPassword() {
+        return bindPassword;
+    }
+
+    public void setBindPassword(String bindPassword) {
+        this.bindPassword = bindPassword;
+    }
+
+    public String getBindUsername() {
+        return bindUsername;
+    }
+
+    public void setBindUsername(String bindUsername) {
+        this.bindUsername = bindUsername;
     }
 }

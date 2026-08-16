@@ -55,7 +55,7 @@ public class LdapAuthenticationService {
              * Find the user's Distinguished Name.
              */
             searchContext =
-                    connectionFactory.createAnonymousContext();
+                    connectionFactory.createSearchContext();
 
             String distinguishedName =
                     searchService.findDistinguishedName(

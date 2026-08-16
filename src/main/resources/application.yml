@@ -61,6 +61,8 @@ ldap:
   peopleDirectory: ou=people,dc=company,dc=com
   connectionTimeoutMillis: 5000
   readTimeoutMillis: 5000
+  bindUsername: sa-svc-carm-bind
+  bindPassword: ENC(BIND-ACCOUNT-ENCRYPTED-PASSWORD)
 
 ################################################################################
 # Security
