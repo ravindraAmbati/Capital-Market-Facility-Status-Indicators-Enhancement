@@ -1,82 +1,274 @@
 package com.sab.carm.fcm.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sab.carm.fcm.audit.AuditService;
+import com.sab.carm.fcm.authentication.LdapAuthenticationResult;
 import com.sab.carm.fcm.authentication.LdapAuthenticationService;
 import com.sab.carm.fcm.authorization.AuthorizationService;
 import com.sab.carm.fcm.dto.AuthenticationRequest;
+import com.sab.carm.fcm.dto.AuthenticationResponse;
 import com.sab.carm.fcm.exception.AuthenticationFailedException;
 import com.sab.carm.fcm.security.SecurityContextService;
 import com.sab.carm.fcm.security.TokenService;
-import com.sab.carm.fcm.security.CurrentUser;
 import com.sab.carm.fcm.validator.AuthenticationRequestValidator;
-import java.util.Arrays;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import javax.servlet.http.HttpServletRequest;
+
+@ExtendWith(MockitoExtension.class)
 class SecurityServiceTest {
 
-    @Test
-    void authenticatesApiUserAndGeneratesToken() {
-        LdapAuthenticationService ldap = mock(LdapAuthenticationService.class);
-        AuthorizationService authorization = mock(AuthorizationService.class);
-        TokenService tokenService = mock(TokenService.class);
-        AuditService audit = mock(AuditService.class);
-        AuthenticationRequestValidator validator = mock(AuthenticationRequestValidator.class);
-        SecurityContextService context = mock(SecurityContextService.class);
-        HttpServletRequest servletRequest = mock(HttpServletRequest.class);
-        AuthenticationRequest request = request();
-        when(validator.isValid(request)).thenReturn(true);
-        when(ldap.authenticate("svc_api", "secret")).thenReturn(true);
-        when(authorization.isApiUser("svc_api")).thenReturn(true);
-        when(authorization.rolesFor("svc_api")).thenReturn(Arrays.asList("API"));
-        when(tokenService.generateToken(eq("svc_api"), any(), any())).thenReturn("token");
-        when(tokenService.expirationSeconds()).thenReturn(1800L);
+    @Mock
+    private LdapAuthenticationService ldapAuthenticationService;
 
-        SecurityService service = new SecurityService(ldap, authorization, tokenService, audit, validator, context);
+    @Mock
+    private AuthorizationService authorizationService;
 
-        assertThat(service.authenticate(request, servletRequest).getToken()).isEqualTo("token");
-        verify(audit).record(eq("TOKEN_GENERATED"), eq("svc_api"), any());
+    @Mock
+    private TokenService tokenService;
+
+    @Mock
+    private AuditService auditService;
+
+    @Mock
+    private AuthenticationRequestValidator validator;
+
+    @Mock
+    private SecurityContextService securityContextService;
+
+    @Mock
+    private HttpServletRequest servletRequest;
+
+    private SecurityService securityService;
+
+    @BeforeEach
+    void setUp() {
+
+        securityService =
+                new SecurityService(
+                        ldapAuthenticationService,
+                        authorizationService,
+                        tokenService,
+                        auditService,
+                        validator,
+                        securityContextService);
     }
 
     @Test
-    void rejectsInvalidApiLogin() {
-        SecurityService service = new SecurityService(mock(LdapAuthenticationService.class), mock(AuthorizationService.class),
-                mock(TokenService.class), mock(AuditService.class), mock(AuthenticationRequestValidator.class),
-                mock(SecurityContextService.class));
+    void authenticateShouldGenerateTokenForApiUser() {
 
-        assertThatThrownBy(() -> service.authenticate(request(), mock(HttpServletRequest.class)))
-                .isInstanceOf(AuthenticationFailedException.class);
+        AuthenticationRequest request =
+                new AuthenticationRequest(
+                        "sa-svc-carm-api",
+                        "password");
+
+        LdapAuthenticationResult result =
+                LdapAuthenticationResult.success(
+                        request.getUsername(),
+                        "cn=api-user");
+
+        when(validator.isValid(request))
+                .thenReturn(true);
+
+        when(ldapAuthenticationService.authenticate(
+                request.getUsername(),
+                request.getPassword()))
+                .thenReturn(result);
+
+        when(authorizationService.isApiUser(
+                request.getUsername()))
+                .thenReturn(true);
+
+        when(authorizationService.rolesFor(
+                request.getUsername()))
+                .thenReturn(
+                        java.util.Collections.singletonList(
+                                "API"));
+
+        when(tokenService.generateToken(
+                eq(request.getUsername()),
+                any(),
+                any()))
+                .thenReturn("token");
+
+        when(tokenService.expirationSeconds())
+                .thenReturn(1800L);
+
+        AuthenticationResponse response =
+                securityService.authenticate(
+                        request,
+                        servletRequest);
+
+        assertEquals(
+                "token",
+                response.getToken());
+
+        verify(auditService)
+                .record(
+                        eq("TOKEN_GENERATED"),
+                        eq(request.getUsername()),
+                        any());
     }
 
     @Test
-    void invalidatesSessionOnLogout() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpSession session = mock(HttpSession.class);
-        when(request.getSession(false)).thenReturn(session);
-        SecurityContextService context = mock(SecurityContextService.class);
-        when(context.currentUser()).thenReturn(new CurrentUser("admin1",
-                Arrays.asList("ADMIN"), "SESSION"));
-        SecurityService service = new SecurityService(mock(LdapAuthenticationService.class), mock(AuthorizationService.class),
-                mock(TokenService.class), mock(AuditService.class), mock(AuthenticationRequestValidator.class), context);
+    void authenticateShouldRejectNonApiUser() {
 
-        service.logout(request);
+        AuthenticationRequest request =
+                new AuthenticationRequest(
+                        "sa-svc-carm-audit",
+                        "password");
 
-        verify(session).invalidate();
+        when(validator.isValid(request))
+                .thenReturn(true);
+
+        when(ldapAuthenticationService.authenticate(
+                request.getUsername(),
+                request.getPassword()))
+                .thenReturn(
+                        LdapAuthenticationResult.success(
+                                request.getUsername(),
+                                "cn=audit-user"));
+
+        when(authorizationService.isApiUser(
+                request.getUsername()))
+                .thenReturn(false);
+
+        assertThrows(
+                AuthenticationFailedException.class,
+                () -> securityService.authenticate(
+                        request,
+                        servletRequest));
+
+        verify(auditService)
+                .record(
+                        eq("LOGIN_FAILURE"),
+                        eq(request.getUsername()),
+                        any());
     }
 
-    private AuthenticationRequest request() {
-        AuthenticationRequest request = new AuthenticationRequest();
-        request.setUsername("svc_api");
-        request.setPassword("secret");
-        return request;
+    @Test
+    void loginShouldAllowAdminUser() {
+
+        AuthenticationRequest request =
+                new AuthenticationRequest(
+                        "sa-svc-carm-fcm-admin",
+                        "password");
+
+        when(validator.isValid(request))
+                .thenReturn(true);
+
+        when(ldapAuthenticationService.authenticate(
+                request.getUsername(),
+                request.getPassword()))
+                .thenReturn(
+                        LdapAuthenticationResult.success(
+                                request.getUsername(),
+                                "cn=admin-user"));
+
+        when(authorizationService.isAdmin(
+                request.getUsername()))
+                .thenReturn(true);
+
+        when(authorizationService.rolesFor(
+                request.getUsername()))
+                .thenReturn(
+                        java.util.Collections.singletonList(
+                                "ADMIN"));
+
+        securityService.login(
+                request,
+                servletRequest);
+
+        verify(auditService)
+                .record(
+                        eq("LOGIN_SUCCESS"),
+                        eq(request.getUsername()),
+                        any());
+    }
+
+    @Test
+    void loginShouldRejectUnauthorizedUser() {
+
+        AuthenticationRequest request =
+                new AuthenticationRequest(
+                        "unknown-user",
+                        "password");
+
+        when(validator.isValid(request))
+                .thenReturn(true);
+
+        when(ldapAuthenticationService.authenticate(
+                request.getUsername(),
+                request.getPassword()))
+                .thenReturn(
+                        LdapAuthenticationResult.success(
+                                request.getUsername(),
+                                "cn=unknown-user"));
+
+        when(authorizationService.isAdmin(
+                request.getUsername()))
+                .thenReturn(false);
+
+        when(authorizationService.isAuditUser(
+                request.getUsername()))
+                .thenReturn(false);
+
+        when(authorizationService.isItsupUser(
+                request.getUsername()))
+                .thenReturn(false);
+
+        assertThrows(
+                AuthenticationFailedException.class,
+                () -> securityService.login(
+                        request,
+                        servletRequest));
+
+        verify(auditService)
+                .record(
+                        eq("LOGIN_FAILURE"),
+                        eq(request.getUsername()),
+                        any());
+    }
+
+    @Test
+    void loginShouldRejectInvalidLdapCredentials() {
+
+        AuthenticationRequest request =
+                new AuthenticationRequest(
+                        "sa-svc-carm-admin",
+                        "wrong-password");
+
+        when(validator.isValid(request))
+                .thenReturn(true);
+
+        when(ldapAuthenticationService.authenticate(
+                request.getUsername(),
+                request.getPassword()))
+                .thenReturn(
+                        LdapAuthenticationResult.invalidPassword(
+                                request.getUsername()));
+
+        assertThrows(
+                AuthenticationFailedException.class,
+                () -> securityService.login(
+                        request,
+                        servletRequest));
+
+        verify(auditService)
+                .record(
+                        eq("LOGIN_FAILURE"),
+                        eq(request.getUsername()),
+                        any());
     }
 }
