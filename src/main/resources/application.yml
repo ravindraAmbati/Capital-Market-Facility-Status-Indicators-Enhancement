@@ -149,10 +149,10 @@ carm:
       - "1200"
       - "1060"
 
-  defaults:
-    facility-type:
-      advised: "Y"
-      committed: "Y"
+    defaults:
+      facility-type:
+        advised: "Y"
+        committed: "Y"
 
-    purpose-code:
-      unconditional-cancellable: "Y"
+      purpose-code:
+        unconditional-cancellable: "Y"
