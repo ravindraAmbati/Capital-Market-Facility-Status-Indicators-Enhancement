@@ -11,8 +11,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SecurityRoleProperties {
 
     private List<String> admin = new ArrayList<>();
+
     private List<String> api = new ArrayList<>();
-    private List<String> readonly = new ArrayList<>();
+
+    private List<String> audit = new ArrayList<>();
+
+    private List<String> itsup = new ArrayList<>();
 
     public List<String> getAdmin() {
         return admin;
@@ -30,11 +34,19 @@ public class SecurityRoleProperties {
         this.api = api;
     }
 
-    public List<String> getReadonly() {
-        return readonly;
+    public List<String> getAudit() {
+        return audit;
     }
 
-    public void setReadonly(List<String> readonly) {
-        this.readonly = readonly;
+    public void setAudit(List<String> audit) {
+        this.audit = audit;
+    }
+
+    public List<String> getItsup() {
+        return itsup;
+    }
+
+    public void setItsup(List<String> itsup) {
+        this.itsup = itsup;
     }
 }
