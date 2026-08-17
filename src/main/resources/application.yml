@@ -130,3 +130,25 @@ logging:
     org.springframework: INFO
     org.mongodb.driver: INFO
     com.sab.carm.fcm: DEBUG
+
+################################################################################
+# CARM Reference Data
+################################################################################
+
+carm:
+  api:
+    base-url: https://{hostname}
+    reference-data-path: /CarmDataService/referenceTable/data
+    method: POST
+    content-type: application/json
+
+  site-id: ABCD
+
+  reference-data:
+    tables:
+      - "1020"
+      - "1030"
+      - "1200"
+      - "0130"
+      - "1220"
+      - "1060"
