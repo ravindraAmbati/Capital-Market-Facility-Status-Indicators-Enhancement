@@ -1,14 +1,18 @@
 package com.sab.carm.fcm.carm;
 
-import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(
+        prefix = "carm.reference-data",
+        name = "load-on-startup",
+        havingValue = "true",
+        matchIfMissing = false)
 public class CarmReferenceDataStartup
         implements ApplicationRunner {
 
@@ -16,10 +20,10 @@ public class CarmReferenceDataStartup
             LoggerFactory.getLogger(
                     CarmReferenceDataStartup.class);
 
-    private final CarmReferenceDataService service;
+    private final CarmMaintenanceReferenceDataService service;
 
     public CarmReferenceDataStartup(
-            CarmReferenceDataService service) {
+            CarmMaintenanceReferenceDataService service) {
 
         this.service = service;
     }
@@ -29,14 +33,11 @@ public class CarmReferenceDataStartup
             ApplicationArguments args) {
 
         LOGGER.info(
-                "Starting CARM reference-data fetch.");
+                "Starting CARM reference-data synchronization.");
 
-        Map<String, List<Map<String, Object>>> data =
-                service.fetchConfiguredReferenceData();
+        service.refresh();
 
         LOGGER.info(
-                "CARM reference-data fetch completed. "
-                        + "successfulTableCount={}",
-                data.size());
+                "CARM reference-data synchronization completed.");
     }
 }

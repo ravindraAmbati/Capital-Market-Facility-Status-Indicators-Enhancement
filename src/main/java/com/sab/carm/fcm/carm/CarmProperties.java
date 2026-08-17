@@ -79,7 +79,17 @@ public class CarmProperties {
 
     public static class ReferenceData {
 
+        private boolean loadOnStartup;
         private List<String> tables = new ArrayList<>();
+        private Defaults defaults = new Defaults();
+
+        public boolean isLoadOnStartup() {
+            return loadOnStartup;
+        }
+
+        public void setLoadOnStartup(boolean loadOnStartup) {
+            this.loadOnStartup = loadOnStartup;
+        }
 
         public List<String> getTables() {
             return tables;
@@ -87,6 +97,74 @@ public class CarmProperties {
 
         public void setTables(List<String> tables) {
             this.tables = tables;
+        }
+
+        public Defaults getDefaults() {
+            return defaults;
+        }
+
+        public void setDefaults(Defaults defaults) {
+            this.defaults = defaults;
+        }
+    }
+
+    public static class Defaults {
+
+        private FacilityType facilityType = new FacilityType();
+        private PurposeCode purposeCode = new PurposeCode();
+
+        public FacilityType getFacilityType() {
+            return facilityType;
+        }
+
+        public void setFacilityType(FacilityType facilityType) {
+            this.facilityType = facilityType;
+        }
+
+        public PurposeCode getPurposeCode() {
+            return purposeCode;
+        }
+
+        public void setPurposeCode(PurposeCode purposeCode) {
+            this.purposeCode = purposeCode;
+        }
+    }
+
+    public static class FacilityType {
+
+        private String advised = "Y";
+        private String committed = "Y";
+
+        public String getAdvised() {
+            return advised;
+        }
+
+        public void setAdvised(String advised) {
+            this.advised = advised;
+        }
+
+        public String getCommitted() {
+            return committed;
+        }
+
+        public void setCommitted(String committed) {
+            this.committed = committed;
+        }
+    }
+
+    public static class PurposeCode {
+
+        private String unconditionalCancellable = "Y";
+
+        public String getUnconditionalCancellable() {
+            return unconditionalCancellable;
+        }
+
+        public void setUnconditionalCancellable(
+                String unconditionalCancellable) {
+
+            this.unconditionalCancellable =
+                    unconditionalCancellable;
         }
     }
 }

@@ -146,9 +146,13 @@ carm:
 
   reference-data:
     tables:
-      - "1020"
-      - "1030"
       - "1200"
-      - "0130"
-      - "1220"
       - "1060"
+
+  defaults:
+    facility-type:
+      advised: "Y"
+      committed: "Y"
+
+    purpose-code:
+      unconditional-cancellable: "Y"
