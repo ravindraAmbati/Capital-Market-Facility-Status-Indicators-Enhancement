@@ -60,6 +60,11 @@ public class CarmReferenceDataService {
                                 + "table={}",
                         tableName,
                         ex);
+
+                throw new IllegalStateException(
+                        "Unable to fetch CARM reference data for table "
+                                + tableName,
+                        ex);
             }
         }
 

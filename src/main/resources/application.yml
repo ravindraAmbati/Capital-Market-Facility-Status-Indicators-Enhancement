@@ -112,6 +112,12 @@ mongodb:
 
     referenceDataMappings: referenceDataMappings
 
+    facilityTypeMaintenance: facilityTypeMaintenance
+
+    purposeCodeMaintenance: purposeCodeMaintenance
+
+    maintenanceHistory: maintenanceHistory
+
 ################################################################################
 # Swagger
 ################################################################################
