@@ -169,7 +169,29 @@ public class SecurityConfig
                         HttpMethod.DELETE,
                         "/api/**")
                 .hasRole("ADMIN")
+                .antMatchers(
+                        HttpMethod.POST,
+                        "/api/carm/reference-data/refresh/**")
+                .hasRole("ADMIN")
 
+                .antMatchers(
+                        HttpMethod.PUT,
+                        "/api/maintenance/facility-types/*/indicators",
+                        "/api/maintenance/purpose-codes/*/*/indicator")
+                .hasRole("ADMIN")
+
+                .antMatchers(
+                        HttpMethod.GET,
+                        "/api/maintenance/facility-types",
+                        "/api/maintenance/facility-types/*",
+                        "/api/maintenance/purpose-codes",
+                        "/api/maintenance/purpose-codes/*/*")
+                .hasAnyRole(
+                        "ADMIN",
+                        "API",
+                        "READONLY",
+                        "ITSUP",
+                        "AUDIT")
                 /*
                  * Everything else requires authentication.
                  */

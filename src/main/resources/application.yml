@@ -112,6 +112,12 @@ mongodb:
 
     referenceDataMappings: referenceDataMappings
 
+    facilityTypeMaintenance: facilityTypeMaintenance
+
+    purposeCodeMaintenance: purposeCodeMaintenance
+
+    maintenanceHistory: maintenanceHistory
+
 ################################################################################
 # Swagger
 ################################################################################
@@ -130,3 +136,29 @@ logging:
     org.springframework: INFO
     org.mongodb.driver: INFO
     com.sab.carm.fcm: DEBUG
+
+################################################################################
+# CARM Reference Data
+################################################################################
+
+carm:
+  api:
+    base-url: https://{hostname}
+    reference-data-path: /CarmDataService/referenceTable/data
+    method: POST
+    content-type: application/json
+
+  site-id: ABCD
+
+  reference-data:
+    tables:
+      - "1200"
+      - "1060"
+
+    defaults:
+      facility-type:
+        advised: "Y"
+        committed: "Y"
+
+      purpose-code:
+        unconditional-cancellable: "Y"
