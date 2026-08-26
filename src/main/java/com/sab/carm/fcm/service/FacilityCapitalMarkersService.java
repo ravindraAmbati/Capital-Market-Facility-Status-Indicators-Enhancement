@@ -14,15 +14,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Facility Capital Markers create/update service.
+ * Facility Capital Markers service.
  *
  * POST is idempotent:
  * - no current record -> CREATE
  * - current record exists and differs -> UPDATE
  * - current record exists and is identical -> NO_CHANGE
  *
- * On UPDATE the previous current record is first copied to history and then
- * the request becomes the new current record.
+ * DELETE moves the complete current record to history, changes the historical
+ * facility number to <facilityNo>_DELETED_<correlationId>, retains the original
+ * facility number, and then removes the current record.
  */
 @Service
 public class FacilityCapitalMarkersService {
@@ -83,17 +84,45 @@ public class FacilityCapitalMarkersService {
         history.setAction("UPDATE");
         historyRepository.save(history);
 
-        /*
-         * Preserve the current Mongo technical id for the updated document.
-         * This keeps the current record as one logical Mongo document while
-         * the previous version is retained independently in history.
-         */
         updateEntity(current, request, correlationId);
 
         FacilityCapitalMarkers saved =
                 repository.save(current);
 
         return operation(FacilityOperation.UPDATED, saved);
+    }
+
+    public boolean delete(
+            String relationshipId,
+            String serialNo,
+            String facilityNo,
+            String correlationId) {
+
+        Optional<FacilityCapitalMarkers> existing =
+                repository
+                        .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                                relationshipId, serialNo, facilityNo);
+
+        if (!existing.isPresent()) {
+            return false;
+        }
+
+        FacilityCapitalMarkers current = existing.get();
+        String transactionId = UUID.randomUUID().toString();
+
+        FacilityCapitalMarkersHistory history =
+                toHistory(current, correlationId, transactionId);
+
+        history.setFacilityNo(
+                facilityNo + "_DELETED_" + correlationId);
+        history.setOriginalFacilityNo(facilityNo);
+        history.setAction("DELETE");
+
+        historyRepository.save(history);
+
+        repository.delete(current);
+
+        return true;
     }
 
     private void updateEntity(
@@ -111,12 +140,10 @@ public class FacilityCapitalMarkersService {
         entity.setApplicationStatus(request.getApplicationStatus());
         entity.setFacilityType(request.getFacilityType());
         entity.setCarmPurposeCode(request.getCarmPurposeCode());
-
         entity.setAdvised(toEntityMarker(request.getAdvised()));
         entity.setCommitted(toEntityMarker(request.getCommitted()));
         entity.setUnconditionalCancellable(
                 toEntityMarker(request.getUnconditionalCancellable()));
-
         entity.setStandingSecurityDocument(
                 request.getStandingSecurityDocument());
         entity.setSeniorityType(request.getSeniorityType());
@@ -132,27 +159,7 @@ public class FacilityCapitalMarkersService {
         FacilityCapitalMarkers entity =
                 new FacilityCapitalMarkers();
 
-        entity.setCreditApplicationRelationshipId(
-                request.getCreditApplicationRelationshipId());
-        entity.setSerialNo(request.getSerialNo());
-        entity.setFacilityNo(request.getFacilityNo());
-        entity.setCustomerId(request.getCustomerId());
-        entity.setBorrowingGroup(request.getBorrowingGroup());
-        entity.setProposalType(request.getProposalType());
-        entity.setApplicationStatus(request.getApplicationStatus());
-        entity.setFacilityType(request.getFacilityType());
-        entity.setCarmPurposeCode(request.getCarmPurposeCode());
-        entity.setAdvised(toEntityMarker(request.getAdvised()));
-        entity.setCommitted(toEntityMarker(request.getCommitted()));
-        entity.setUnconditionalCancellable(
-                toEntityMarker(request.getUnconditionalCancellable()));
-        entity.setStandingSecurityDocument(
-                request.getStandingSecurityDocument());
-        entity.setSeniorityType(request.getSeniorityType());
-        entity.setUpdatedBy(request.getUpdatedBy());
-        entity.setUpdatedDateTime(request.getUpdatedDateTime());
-        entity.setCorrelationId(correlationId);
-
+        updateEntity(entity, request, correlationId);
         return entity;
     }
 
@@ -228,9 +235,7 @@ public class FacilityCapitalMarkersService {
                               request.getUnconditionalCancellable())
                 && equal(current.getStandingSecurityDocument(),
                           request.getStandingSecurityDocument())
-                && equal(current.getSeniorityType(), request.getSeniorityType())
-                && equal(current.getUpdatedBy(), request.getUpdatedBy())
-                && equal(current.getUpdatedDateTime(), request.getUpdatedDateTime());
+                && equal(current.getSeniorityType(), request.getSeniorityType());
     }
 
     private boolean sameMarker(

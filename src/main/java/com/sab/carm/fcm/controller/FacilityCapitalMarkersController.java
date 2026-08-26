@@ -60,4 +60,30 @@ public class FacilityCapitalMarkersController {
                                 "SUCCESS"),
                         operation));
     }
+
+    @DeleteMapping
+    public ResponseEntity<IntegrationResponse<Void>> delete(
+            @RequestHeader(CORRELATION_ID_HEADER) String correlationId,
+            @RequestParam String relationshipId,
+            @RequestParam String serialNo,
+            @RequestParam String facilityNo) {
+
+        boolean deleted = service.delete(
+                relationshipId,
+                serialNo,
+                facilityNo,
+                correlationId);
+
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(
+                new IntegrationResponse<>(
+                        new IntegrationResponseHeader(
+                                correlationId,
+                                UUID.randomUUID().toString(),
+                                "SUCCESS"),
+                        null));
+    }
 }
