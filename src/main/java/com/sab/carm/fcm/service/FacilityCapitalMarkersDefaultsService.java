@@ -70,7 +70,7 @@ public class FacilityCapitalMarkersDefaultsService {
         result.setPurposeCodeCarm(entity.getPurposeCodeCarm());
         result.setPurposeCodeHub(entity.getPurposeCodeHub());
         result.setPurposeCodeDescription(
-                entity.getPurposeCodeDescription());
+                entity.getDescription());
         result.setUnconditionalCancellable(
                 entity.getUnconditionalCancellable());
 

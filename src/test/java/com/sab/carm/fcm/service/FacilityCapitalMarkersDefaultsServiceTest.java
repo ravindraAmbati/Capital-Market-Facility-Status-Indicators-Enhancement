@@ -48,7 +48,7 @@ class FacilityCapitalMarkersDefaultsServiceTest {
                 new PurposeCodeMaintenance();
         purpose.setPurposeCodeCarm("CARM01");
         purpose.setPurposeCodeHub("HUB01");
-        purpose.setPurposeCodeDescription("Purpose 1");
+        purpose.setDescription("Purpose 1");
         purpose.setUnconditionalCancellable("Y");
 
         when(facilityTypeRepository.findAll())
