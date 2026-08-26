@@ -4,9 +4,10 @@ import com.sab.carm.fcm.dto.FacilityTypeIndicatorRequest;
 import com.sab.carm.fcm.dto.FacilityTypeMaintenanceResponse;
 import com.sab.carm.fcm.dto.PurposeCodeIndicatorRequest;
 import com.sab.carm.fcm.dto.PurposeCodeMaintenanceResponse;
+import com.sab.carm.fcm.dto.integration.DefaultsResponse;
 import com.sab.carm.fcm.entity.FacilityTypeMaintenance;
-import com.sab.carm.fcm.entity.PurposeCodeMaintenance;
 import com.sab.carm.fcm.entity.MaintenanceHistory;
+import com.sab.carm.fcm.entity.PurposeCodeMaintenance;
 import com.sab.carm.fcm.repository.FacilityTypeMaintenanceRepository;
 import com.sab.carm.fcm.repository.MaintenanceHistoryRepository;
 import com.sab.carm.fcm.repository.PurposeCodeMaintenanceRepository;
@@ -22,17 +23,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class MaintenanceService {
 
-    private static final String FACILITY_TYPE =
-            "FACILITY_TYPE";
-
-    private static final String PURPOSE_CODE =
-            "PURPOSE_CODE";
-
-    private static final String USER =
-            "USER";
-
-    private static final String INDICATOR_UPDATE =
-            "INDICATOR_UPDATE";
+    private static final String FACILITY_TYPE = "FACILITY_TYPE";
+    private static final String PURPOSE_CODE = "PURPOSE_CODE";
+    private static final String USER = "USER";
+    private static final String INDICATOR_UPDATE = "INDICATOR_UPDATE";
 
     private final FacilityTypeMaintenanceRepository facilityTypes;
     private final PurposeCodeMaintenanceRepository purposeCodes;
@@ -42,15 +36,12 @@ public class MaintenanceService {
             FacilityTypeMaintenanceRepository facilityTypes,
             PurposeCodeMaintenanceRepository purposeCodes,
             MaintenanceHistoryRepository historyRepository) {
-
         this.facilityTypes = facilityTypes;
         this.purposeCodes = purposeCodes;
         this.historyRepository = historyRepository;
     }
 
-    public List<FacilityTypeMaintenanceResponse>
-    getFacilityTypes() {
-
+    public List<FacilityTypeMaintenanceResponse> getFacilityTypes() {
         return facilityTypes.findAll()
                 .stream()
                 .filter(FacilityTypeMaintenance::isActive)
@@ -58,79 +49,47 @@ public class MaintenanceService {
                 .collect(Collectors.toList());
     }
 
-    public FacilityTypeMaintenanceResponse
-    getFacilityType(String code) {
-
-        FacilityTypeMaintenance entity =
-                facilityTypes
-                        .findByFacilityTypeCode(code)
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        "Facility type not found: "
-                                                + code));
-
+    public FacilityTypeMaintenanceResponse getFacilityType(String code) {
+        FacilityTypeMaintenance entity = facilityTypes
+                .findByFacilityTypeCode(code)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Facility type not found: " + code));
         return toFacilityTypeResponse(entity);
     }
 
-    public FacilityTypeMaintenanceResponse
-    updateFacilityTypeIndicators(
+    public FacilityTypeMaintenanceResponse updateFacilityTypeIndicators(
             String code,
             FacilityTypeIndicatorRequest request) {
 
-        FacilityTypeMaintenance entity =
-                facilityTypes
-                        .findByFacilityTypeCode(code)
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        "Facility type not found: "
-                                                + code));
+        FacilityTypeMaintenance entity = facilityTypes
+                .findByFacilityTypeCode(code)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Facility type not found: " + code));
 
         if (!entity.isActive()) {
             throw new IllegalArgumentException(
-                    "Cannot update archived facility type: "
-                            + code);
+                    "Cannot update archived facility type: " + code);
         }
 
-        Map<String, Object> previous =
-                new HashMap<>();
-
-        previous.put(
-                "advised",
-                entity.getAdvised());
-
-        previous.put(
-                "committed",
-                entity.getCommitted());
+        Map<String, Object> previous = new HashMap<>();
+        previous.put("advised", entity.getAdvised());
+        previous.put("committed", entity.getCommitted());
 
         entity.setAdvised(request.getAdvised());
         entity.setCommitted(request.getCommitted());
 
-        FacilityTypeMaintenance saved =
-                facilityTypes.save(entity);
+        FacilityTypeMaintenance saved = facilityTypes.save(entity);
 
-        Map<String, Object> current =
-                new HashMap<>();
+        Map<String, Object> current = new HashMap<>();
+        current.put("advised", saved.getAdvised());
+        current.put("committed", saved.getCommitted());
 
-        current.put(
-                "advised",
-                saved.getAdvised());
-
-        current.put(
-                "committed",
-                saved.getCommitted());
-
-        saveHistory(
-                FACILITY_TYPE,
-                code,
-                previous,
-                current);
+        saveHistory(FACILITY_TYPE, code, previous, current);
 
         return toFacilityTypeResponse(saved);
     }
 
-    public List<PurposeCodeMaintenanceResponse>
-    getPurposeCodes() {
-
+    public List<PurposeCodeMaintenanceResponse> getPurposeCodes() {
         return purposeCodes.findAll()
                 .stream()
                 .filter(PurposeCodeMaintenance::isActive)
@@ -138,49 +97,34 @@ public class MaintenanceService {
                 .collect(Collectors.toList());
     }
 
-    public PurposeCodeMaintenanceResponse
-    getPurposeCode(
+    public PurposeCodeMaintenanceResponse getPurposeCode(
             String hub,
             String carm) {
 
-        PurposeCodeMaintenance entity =
-                purposeCodes
-                        .findByPurposeCodeHubAndPurposeCodeCarm(
-                                hub,
-                                carm)
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        "Purpose code not found: "
-                                                + hub
-                                                + ":"
-                                                + carm));
+        PurposeCodeMaintenance entity = purposeCodes
+                .findByPurposeCodeHubAndPurposeCodeCarm(hub, carm)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Purpose code not found: " + hub + ":" + carm));
 
         return toPurposeCodeResponse(entity);
     }
 
-    public PurposeCodeMaintenanceResponse
-    updatePurposeCodeIndicator(
+    public PurposeCodeMaintenanceResponse updatePurposeCodeIndicator(
             String hub,
             String carm,
             PurposeCodeIndicatorRequest request) {
 
-        PurposeCodeMaintenance entity =
-                purposeCodes
-                        .findByPurposeCodeHubAndPurposeCodeCarm(
-                                hub,
-                                carm)
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        "Purpose code not found"));
+        PurposeCodeMaintenance entity = purposeCodes
+                .findByPurposeCodeHubAndPurposeCodeCarm(hub, carm)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Purpose code not found"));
 
         if (!entity.isActive()) {
             throw new IllegalArgumentException(
                     "Cannot update archived purpose code");
         }
 
-        Map<String, Object> previous =
-                new HashMap<>();
-
+        Map<String, Object> previous = new HashMap<>();
         previous.put(
                 "unconditionalCancellable",
                 entity.getUnconditionalCancellable());
@@ -188,12 +132,9 @@ public class MaintenanceService {
         entity.setUnconditionalCancellable(
                 request.getUnconditionalCancellable());
 
-        PurposeCodeMaintenance saved =
-                purposeCodes.save(entity);
+        PurposeCodeMaintenance saved = purposeCodes.save(entity);
 
-        Map<String, Object> current =
-                new HashMap<>();
-
+        Map<String, Object> current = new HashMap<>();
         current.put(
                 "unconditionalCancellable",
                 saved.getUnconditionalCancellable());
@@ -207,43 +148,49 @@ public class MaintenanceService {
         return toPurposeCodeResponse(saved);
     }
 
+    /**
+     * Returns the complete active maintenance data used by CARM
+     * to resolve facility and purpose-code indicator defaults.
+     *
+     * FCM does not calculate or cache defaults. It exposes the
+     * current maintenance tables; CARM owns caching/refresh.
+     */
+    public DefaultsResponse getDefaults() {
+        DefaultsResponse response = new DefaultsResponse();
+        response.setFacilityTypes(getFacilityTypes());
+        response.setPurposeCodes(getPurposeCodes());
+        return response;
+    }
+
     private void saveHistory(
             String logicalTable,
             String businessKey,
             Map<String, Object> previous,
             Map<String, Object> current) {
 
-        MaintenanceHistory history =
-                new MaintenanceHistory();
-
+        MaintenanceHistory history = new MaintenanceHistory();
         history.setLogicalTable(logicalTable);
         history.setBusinessKey(businessKey);
         history.setAction(INDICATOR_UPDATE);
         history.setSource(USER);
         history.setPreviousData(previous);
         history.setNewData(current);
-        history.setUsername(
-                SecurityUtil.currentUsername());
-        history.setCorrelationId(
-                MDC.get("correlationId"));
+        history.setUsername(SecurityUtil.currentUsername());
+        history.setCorrelationId(MDC.get("correlationId"));
         history.setExecutedAt(Instant.now());
 
         historyRepository.save(history);
     }
 
-    private FacilityTypeMaintenanceResponse
-    toFacilityTypeResponse(
+    private FacilityTypeMaintenanceResponse toFacilityTypeResponse(
             FacilityTypeMaintenance entity) {
 
         FacilityTypeMaintenanceResponse response =
                 new FacilityTypeMaintenanceResponse();
 
-        response.setFacilityTypeCode(
-                entity.getFacilityTypeCode());
-
+        response.setFacilityTypeCode(entity.getFacilityTypeCode());
         response.setFacilityTypeDescription(
                 entity.getFacilityTypeDescription());
-
         response.setAdvised(entity.getAdvised());
         response.setCommitted(entity.getCommitted());
         response.setActive(entity.isActive());
@@ -251,25 +198,17 @@ public class MaintenanceService {
         return response;
     }
 
-    private PurposeCodeMaintenanceResponse
-    toPurposeCodeResponse(
+    private PurposeCodeMaintenanceResponse toPurposeCodeResponse(
             PurposeCodeMaintenance entity) {
 
         PurposeCodeMaintenanceResponse response =
                 new PurposeCodeMaintenanceResponse();
 
-        response.setPurposeCodeHub(
-                entity.getPurposeCodeHub());
-
-        response.setPurposeCodeCarm(
-                entity.getPurposeCodeCarm());
-
-        response.setDescription(
-                entity.getDescription());
-
+        response.setPurposeCodeHub(entity.getPurposeCodeHub());
+        response.setPurposeCodeCarm(entity.getPurposeCodeCarm());
+        response.setDescription(entity.getDescription());
         response.setUnconditionalCancellable(
                 entity.getUnconditionalCancellable());
-
         response.setActive(entity.isActive());
 
         return response;
