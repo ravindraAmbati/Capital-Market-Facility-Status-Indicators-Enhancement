@@ -6,7 +6,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
 
 @Component
 public class ApiAuditInterceptor implements HandlerInterceptor {
@@ -27,25 +26,66 @@ public class ApiAuditInterceptor implements HandlerInterceptor {
             Object handler,
             Exception exception) {
 
-        if (request.getRequestURI().startsWith("/api/")) {
-            String correlationId =
-                    request.getHeader(CORRELATION_ID_HEADER);
+        if (!request.getRequestURI().startsWith("/api/")) {
+            return;
+        }
 
-            if (correlationId != null && !correlationId.trim().isEmpty()) {
-                auditService.audit(
-                        correlationId,
+        String correlationId =
+                request.getHeader(CORRELATION_ID_HEADER);
+
+        if (correlationId == null
+                || correlationId.trim().isEmpty()) {
+            return;
+        }
+
+        auditService.audit(
+                correlationId,
+                request.getMethod(),
+                request.getRequestURI(),
+                resolveOperation(
                         request.getMethod(),
-                        request.getRequestURI(),
-                        request.getMethod(),
-                        response.getStatus() >= 400
-                                ? "FAILED"
-                                : "SUCCESS",
-                        request.getParameter("relationshipId"),
-                        request.getParameter("serialNo"),
-                        request.getParameter("facilityNo"),
-                        null,
-                        Collections.emptyMap());
+                        request.getRequestURI()),
+                response.getStatus() >= 400
+                        ? "FAILED"
+                        : "SUCCESS",
+                request.getParameter("relationshipId"),
+                request.getParameter("serialNo"),
+                request.getParameter("facilityNo"),
+                null,
+                null);
+    }
+
+    private String resolveOperation(
+            String method,
+            String path) {
+
+        if ("/api/carm/fcm/facility".equals(path)) {
+            if ("GET".equalsIgnoreCase(method)) {
+                return "FACILITY_GET";
+            }
+            if ("POST".equalsIgnoreCase(method)) {
+                return "FACILITY_UPSERT";
+            }
+            if ("DELETE".equalsIgnoreCase(method)) {
+                return "FACILITY_DELETE";
             }
         }
+
+        if ("/api/carm/fcm/defaults".equals(path)
+                && "GET".equalsIgnoreCase(method)) {
+            return "DEFAULTS_GET";
+        }
+
+        if ("/api/carm/fcm/creditapplication".equals(path)
+                && "POST".equalsIgnoreCase(method)) {
+            return "CREDIT_APPLICATION_CONSENT";
+        }
+
+        if ("/api/carm/fcm/report".equals(path)
+                && "GET".equalsIgnoreCase(method)) {
+            return "REPORT_GET";
+        }
+
+        return "UNKNOWN_API_OPERATION";
     }
 }
