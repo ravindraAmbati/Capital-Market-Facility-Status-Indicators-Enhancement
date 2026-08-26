@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.UUID;
 
 @Component
 public class CorrelationIdFilter extends OncePerRequestFilter {
@@ -22,26 +23,40 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (request.getRequestURI().startsWith("/api/")) {
-            String correlationId =
-                    request.getHeader(CORRELATION_ID_HEADER);
-
-            if (correlationId == null
-                    || correlationId.trim().isEmpty()) {
-
-                response.setStatus(
-                        HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write(
-                        "{\"header\":{\"status\":\"FAILED\"},"
-                                + "\"body\":{\"code\":\"MISSING_CORRELATION_ID\","
-                                + "\"message\":\""
-                                + CORRELATION_ID_HEADER
-                                + " header is mandatory\"}}");
-                return;
-            }
+        if (!request.getRequestURI().startsWith("/api/")) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        filterChain.doFilter(request, response);
+        String correlationId =
+                request.getHeader(CORRELATION_ID_HEADER);
+
+        if (correlationId == null
+                || correlationId.trim().isEmpty()) {
+
+            response.setStatus(
+                    HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
+            response.getWriter().write(
+                    "{\"header\":{\"status\":\"FAILED\"},"
+                            + "\"body\":{\"code\":\"MISSING_CORRELATION_ID\","
+                            + "\"message\":\""
+                            + CORRELATION_ID_HEADER
+                            + " header is mandatory\"}}");
+            return;
+        }
+
+        String transactionId =
+                UUID.randomUUID().toString();
+
+        CarmFcmTransactionContext.initialize(
+                correlationId,
+                transactionId);
+
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            CarmFcmTransactionContext.clear();
+        }
     }
 }
