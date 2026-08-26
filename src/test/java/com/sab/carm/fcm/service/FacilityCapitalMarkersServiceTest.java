@@ -1,8 +1,11 @@
 package com.sab.carm.fcm.service;
 
+import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersRequest;
 import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersResponse;
 import com.sab.carm.fcm.entity.FacilityCapitalMarkers;
+import com.sab.carm.fcm.repository.FacilityCapitalMarkersHistoryRepository;
 import com.sab.carm.fcm.repository.FacilityCapitalMarkersRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -10,10 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class FacilityCapitalMarkersServiceTest {
@@ -21,12 +22,19 @@ class FacilityCapitalMarkersServiceTest {
     @Mock
     private FacilityCapitalMarkersRepository repository;
 
+    @Mock
+    private FacilityCapitalMarkersHistoryRepository historyRepository;
+
     private FacilityCapitalMarkersService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new FacilityCapitalMarkersService(
+                repository, historyRepository);
+    }
 
     @Test
     void shouldReturnFacilityWhenRecordExists() {
-        service = new FacilityCapitalMarkersService(repository);
-
         FacilityCapitalMarkers entity = entity();
 
         when(repository
@@ -50,12 +58,11 @@ class FacilityCapitalMarkersServiceTest {
         verify(repository)
                 .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
                         "REL001", "001", "123");
+        verifyNoInteractions(historyRepository);
     }
 
     @Test
     void shouldReturnEmptyWhenRecordDoesNotExist() {
-        service = new FacilityCapitalMarkersService(repository);
-
         when(repository
                 .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
                         "REL001", "001", "123"))
@@ -64,7 +71,8 @@ class FacilityCapitalMarkersServiceTest {
         Optional<FacilityCapitalMarkersResponse> result =
                 service.find("REL001", "001", "123");
 
-        assertTrue(!result.isPresent());
+        assertFalse(result.isPresent());
+        verifyNoInteractions(historyRepository);
     }
 
     private FacilityCapitalMarkers entity() {

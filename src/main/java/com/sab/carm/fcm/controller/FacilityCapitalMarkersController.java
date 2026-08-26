@@ -1,22 +1,17 @@
 package com.sab.carm.fcm.controller;
 
+import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersOperationResponse;
+import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersRequest;
 import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersResponse;
 import com.sab.carm.fcm.dto.integration.IntegrationResponse;
 import com.sab.carm.fcm.dto.integration.IntegrationResponseHeader;
 import com.sab.carm.fcm.service.FacilityCapitalMarkersService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
-/**
- * CARM-FCM Facility Capital Markers integration API.
- */
 @RestController
 @RequestMapping("/api/carm/fcm/facility")
 public class FacilityCapitalMarkersController {
@@ -46,7 +41,23 @@ public class FacilityCapitalMarkersController {
                                         UUID.randomUUID().toString(),
                                         "SUCCESS"),
                                 response)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<IntegrationResponse<FacilityCapitalMarkersOperationResponse>> post(
+            @RequestHeader(CORRELATION_ID_HEADER) String correlationId,
+            @Valid @RequestBody FacilityCapitalMarkersRequest request) {
+
+        FacilityCapitalMarkersOperationResponse operation =
+                service.upsert(request, correlationId);
+
+        return ResponseEntity.ok(
+                new IntegrationResponse<>(
+                        new IntegrationResponseHeader(
+                                correlationId,
+                                UUID.randomUUID().toString(),
+                                "SUCCESS"),
+                        operation));
     }
 }

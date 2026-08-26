@@ -1,24 +1,40 @@
 package com.sab.carm.fcm.service;
 
+import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersOperationResponse;
+import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersRequest;
 import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersResponse;
+import com.sab.carm.fcm.dto.integration.FacilityOperation;
 import com.sab.carm.fcm.entity.FacilityCapitalMarkers;
+import com.sab.carm.fcm.entity.FacilityCapitalMarkersHistory;
+import com.sab.carm.fcm.repository.FacilityCapitalMarkersHistoryRepository;
 import com.sab.carm.fcm.repository.FacilityCapitalMarkersRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
- * Read-only service for the CARM-FCM facility GET API.
+ * Facility Capital Markers create/update service.
  *
- * No create/update/delete/default processing belongs here.
+ * POST is idempotent:
+ * - no current record -> CREATE
+ * - current record exists and differs -> UPDATE
+ * - current record exists and is identical -> NO_CHANGE
+ *
+ * On UPDATE the previous current record is first copied to history and then
+ * the request becomes the new current record.
  */
 @Service
 public class FacilityCapitalMarkersService {
 
     private final FacilityCapitalMarkersRepository repository;
+    private final FacilityCapitalMarkersHistoryRepository historyRepository;
 
-    public FacilityCapitalMarkersService(FacilityCapitalMarkersRepository repository) {
+    public FacilityCapitalMarkersService(
+            FacilityCapitalMarkersRepository repository,
+            FacilityCapitalMarkersHistoryRepository historyRepository) {
         this.repository = repository;
+        this.historyRepository = historyRepository;
     }
 
     public Optional<FacilityCapitalMarkersResponse> find(
@@ -30,6 +46,222 @@ public class FacilityCapitalMarkersService {
                 .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
                         relationshipId, serialNo, facilityNo)
                 .map(this::toResponse);
+    }
+
+    public FacilityCapitalMarkersOperationResponse upsert(
+            FacilityCapitalMarkersRequest request,
+            String correlationId) {
+
+        Optional<FacilityCapitalMarkers> existing =
+                repository
+                        .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                                request.getCreditApplicationRelationshipId(),
+                                request.getSerialNo(),
+                                request.getFacilityNo());
+
+        if (!existing.isPresent()) {
+            FacilityCapitalMarkers created =
+                    toEntity(request, correlationId);
+
+            FacilityCapitalMarkers saved =
+                    repository.save(created);
+
+            return operation(FacilityOperation.CREATED, saved);
+        }
+
+        FacilityCapitalMarkers current = existing.get();
+
+        if (sameBusinessData(current, request)) {
+            return operation(FacilityOperation.NO_CHANGE, current);
+        }
+
+        String transactionId = UUID.randomUUID().toString();
+
+        FacilityCapitalMarkersHistory history =
+                toHistory(current, correlationId, transactionId);
+
+        history.setAction("UPDATE");
+        historyRepository.save(history);
+
+        /*
+         * Preserve the current Mongo technical id for the updated document.
+         * This keeps the current record as one logical Mongo document while
+         * the previous version is retained independently in history.
+         */
+        updateEntity(current, request, correlationId);
+
+        FacilityCapitalMarkers saved =
+                repository.save(current);
+
+        return operation(FacilityOperation.UPDATED, saved);
+    }
+
+    private void updateEntity(
+            FacilityCapitalMarkers entity,
+            FacilityCapitalMarkersRequest request,
+            String correlationId) {
+
+        entity.setCreditApplicationRelationshipId(
+                request.getCreditApplicationRelationshipId());
+        entity.setSerialNo(request.getSerialNo());
+        entity.setFacilityNo(request.getFacilityNo());
+        entity.setCustomerId(request.getCustomerId());
+        entity.setBorrowingGroup(request.getBorrowingGroup());
+        entity.setProposalType(request.getProposalType());
+        entity.setApplicationStatus(request.getApplicationStatus());
+        entity.setFacilityType(request.getFacilityType());
+        entity.setCarmPurposeCode(request.getCarmPurposeCode());
+
+        entity.setAdvised(toEntityMarker(request.getAdvised()));
+        entity.setCommitted(toEntityMarker(request.getCommitted()));
+        entity.setUnconditionalCancellable(
+                toEntityMarker(request.getUnconditionalCancellable()));
+
+        entity.setStandingSecurityDocument(
+                request.getStandingSecurityDocument());
+        entity.setSeniorityType(request.getSeniorityType());
+        entity.setUpdatedBy(request.getUpdatedBy());
+        entity.setUpdatedDateTime(request.getUpdatedDateTime());
+        entity.setCorrelationId(correlationId);
+    }
+
+    private FacilityCapitalMarkers toEntity(
+            FacilityCapitalMarkersRequest request,
+            String correlationId) {
+
+        FacilityCapitalMarkers entity =
+                new FacilityCapitalMarkers();
+
+        entity.setCreditApplicationRelationshipId(
+                request.getCreditApplicationRelationshipId());
+        entity.setSerialNo(request.getSerialNo());
+        entity.setFacilityNo(request.getFacilityNo());
+        entity.setCustomerId(request.getCustomerId());
+        entity.setBorrowingGroup(request.getBorrowingGroup());
+        entity.setProposalType(request.getProposalType());
+        entity.setApplicationStatus(request.getApplicationStatus());
+        entity.setFacilityType(request.getFacilityType());
+        entity.setCarmPurposeCode(request.getCarmPurposeCode());
+        entity.setAdvised(toEntityMarker(request.getAdvised()));
+        entity.setCommitted(toEntityMarker(request.getCommitted()));
+        entity.setUnconditionalCancellable(
+                toEntityMarker(request.getUnconditionalCancellable()));
+        entity.setStandingSecurityDocument(
+                request.getStandingSecurityDocument());
+        entity.setSeniorityType(request.getSeniorityType());
+        entity.setUpdatedBy(request.getUpdatedBy());
+        entity.setUpdatedDateTime(request.getUpdatedDateTime());
+        entity.setCorrelationId(correlationId);
+
+        return entity;
+    }
+
+    private FacilityCapitalMarkers.CapitalMarker toEntityMarker(
+            FacilityCapitalMarkersRequest.CapitalMarkerRequest source) {
+
+        if (source == null) {
+            return null;
+        }
+
+        FacilityCapitalMarkers.CapitalMarker target =
+                new FacilityCapitalMarkers.CapitalMarker();
+
+        target.setIndicator(source.getIndicator());
+        target.setOverride(source.isOverride());
+        target.setOverrideJustification(
+                source.getOverrideJustification());
+
+        return target;
+    }
+
+    private FacilityCapitalMarkersHistory toHistory(
+            FacilityCapitalMarkers current,
+            String correlationId,
+            String transactionId) {
+
+        FacilityCapitalMarkersHistory history =
+                new FacilityCapitalMarkersHistory();
+
+        history.setCreditApplicationRelationshipId(
+                current.getCreditApplicationRelationshipId());
+        history.setSerialNo(current.getSerialNo());
+        history.setFacilityNo(current.getFacilityNo());
+        history.setOriginalFacilityNo(current.getFacilityNo());
+        history.setCustomerId(current.getCustomerId());
+        history.setBorrowingGroup(current.getBorrowingGroup());
+        history.setProposalType(current.getProposalType());
+        history.setApplicationStatus(current.getApplicationStatus());
+        history.setFacilityType(current.getFacilityType());
+        history.setCarmPurposeCode(current.getCarmPurposeCode());
+        history.setAdvised(current.getAdvised());
+        history.setCommitted(current.getCommitted());
+        history.setUnconditionalCancellable(
+                current.getUnconditionalCancellable());
+        history.setStandingSecurityDocument(
+                current.getStandingSecurityDocument());
+        history.setSeniorityType(current.getSeniorityType());
+        history.setUpdatedBy(current.getUpdatedBy());
+        history.setUpdatedDateTime(current.getUpdatedDateTime());
+        history.setCorrelationId(correlationId);
+        history.setTransactionId(transactionId);
+
+        return history;
+    }
+
+    private boolean sameBusinessData(
+            FacilityCapitalMarkers current,
+            FacilityCapitalMarkersRequest request) {
+
+        return equal(current.getCreditApplicationRelationshipId(),
+                request.getCreditApplicationRelationshipId())
+                && equal(current.getSerialNo(), request.getSerialNo())
+                && equal(current.getFacilityNo(), request.getFacilityNo())
+                && equal(current.getCustomerId(), request.getCustomerId())
+                && equal(current.getBorrowingGroup(), request.getBorrowingGroup())
+                && equal(current.getProposalType(), request.getProposalType())
+                && equal(current.getApplicationStatus(), request.getApplicationStatus())
+                && equal(current.getFacilityType(), request.getFacilityType())
+                && equal(current.getCarmPurposeCode(), request.getCarmPurposeCode())
+                && sameMarker(current.getAdvised(), request.getAdvised())
+                && sameMarker(current.getCommitted(), request.getCommitted())
+                && sameMarker(current.getUnconditionalCancellable(),
+                              request.getUnconditionalCancellable())
+                && equal(current.getStandingSecurityDocument(),
+                          request.getStandingSecurityDocument())
+                && equal(current.getSeniorityType(), request.getSeniorityType())
+                && equal(current.getUpdatedBy(), request.getUpdatedBy())
+                && equal(current.getUpdatedDateTime(), request.getUpdatedDateTime());
+    }
+
+    private boolean sameMarker(
+            FacilityCapitalMarkers.CapitalMarker current,
+            FacilityCapitalMarkersRequest.CapitalMarkerRequest request) {
+
+        if (current == null || request == null) {
+            return current == null && request == null;
+        }
+
+        return equal(current.getIndicator(), request.getIndicator())
+                && current.isOverride() == request.isOverride()
+                && equal(current.getOverrideJustification(),
+                         request.getOverrideJustification());
+    }
+
+    private boolean equal(Object left, Object right) {
+        return left == null ? right == null : left.equals(right);
+    }
+
+    private FacilityCapitalMarkersOperationResponse operation(
+            FacilityOperation operation,
+            FacilityCapitalMarkers entity) {
+
+        FacilityCapitalMarkersOperationResponse response =
+                new FacilityCapitalMarkersOperationResponse();
+
+        response.setOperation(operation);
+        response.setFacilityCapitalMarkers(toResponse(entity));
+
+        return response;
     }
 
     private FacilityCapitalMarkersResponse toResponse(
@@ -53,7 +285,6 @@ public class FacilityCapitalMarkersService {
         response.setSeniorityType(entity.getSeniorityType());
         response.setUpdatedBy(entity.getUpdatedBy());
         response.setUpdatedDateTime(entity.getUpdatedDateTime());
-
         response.setAdvised(toRequestMarker(entity.getAdvised()));
         response.setCommitted(toRequestMarker(entity.getCommitted()));
         response.setUnconditionalCancellable(
@@ -62,31 +293,21 @@ public class FacilityCapitalMarkersService {
         return response;
     }
 
-    private com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersRequest.CapitalMarkerRequest
-    toRequestMarker(FacilityCapitalMarkers.CapitalMarker source) {
+    private FacilityCapitalMarkersRequest.CapitalMarkerRequest toRequestMarker(
+            FacilityCapitalMarkers.CapitalMarker source) {
 
         if (source == null) {
             return null;
         }
 
-        com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersRequest.CapitalMarkerRequest
-                target =
-                new com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersRequest.CapitalMarkerRequest();
+        FacilityCapitalMarkersRequest.CapitalMarkerRequest target =
+                new FacilityCapitalMarkersRequest.CapitalMarkerRequest();
 
         target.setIndicator(source.getIndicator());
         target.setOverride(source.isOverride());
-        target.setOverrideJustification(source.getOverrideJustification());
+        target.setOverrideJustification(
+                source.getOverrideJustification());
 
         return target;
-    }
-
-    /**
-     * Internal compile-time adapter placeholder is deliberately unused.
-     * Kept out of the public API surface.
-     */
-    private static class FacilityCapitalMarkersRequestMarkerAdapter {
-        private String indicator;
-        private boolean override;
-        private String overrideJustification;
     }
 }
