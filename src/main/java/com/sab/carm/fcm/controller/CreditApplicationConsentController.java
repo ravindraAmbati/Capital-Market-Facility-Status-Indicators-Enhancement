@@ -1,16 +1,17 @@
 package com.sab.carm.fcm.controller;
 
+import com.sab.carm.fcm.config.ApiAuditRequestContext;
+import com.sab.carm.fcm.config.IntegrationResponseHeaderFactory;
 import com.sab.carm.fcm.dto.integration.CreditApplicationConsentRequest;
 import com.sab.carm.fcm.dto.integration.CreditApplicationConsentResponse;
 import com.sab.carm.fcm.dto.integration.IntegrationResponse;
-import com.sab.carm.fcm.dto.integration.IntegrationResponseHeader;
 import com.sab.carm.fcm.service.CreditApplicationConsentService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/carm/fcm/creditapplication")
@@ -32,18 +33,23 @@ public class CreditApplicationConsentController {
     public ResponseEntity<
             IntegrationResponse<CreditApplicationConsentResponse>> post(
             @RequestHeader(CORRELATION_ID_HEADER) String correlationId,
-            @Valid @RequestBody CreditApplicationConsentRequest request) {
+            @Valid @RequestBody CreditApplicationConsentRequest requestBody,
+            HttpServletRequest request) {
+
+        ApiAuditRequestContext.setRelationshipId(
+                request, requestBody.getRelationshipId());
+        ApiAuditRequestContext.setSerialNo(
+                request, requestBody.getSerialNo());
+        ApiAuditRequestContext.setUserId(
+                request, requestBody.getHubUserId());
 
         CreditApplicationConsentResponse body =
-                service.addConsent(request, correlationId);
-
-        IntegrationResponseHeader header =
-                new IntegrationResponseHeader(
-                        correlationId,
-                        UUID.randomUUID().toString(),
-                        "SUCCESS");
+                service.addConsent(requestBody, correlationId);
 
         return ResponseEntity.ok(
-                new IntegrationResponse<>(header, body));
+                new IntegrationResponse<>(
+                        IntegrationResponseHeaderFactory.success(
+                                correlationId),
+                        body));
     }
 }

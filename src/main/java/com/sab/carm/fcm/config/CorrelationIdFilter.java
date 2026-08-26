@@ -33,9 +33,7 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
 
         if (correlationId == null
                 || correlationId.trim().isEmpty()) {
-
-            response.setStatus(
-                    HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType("application/json");
             response.getWriter().write(
                     "{\"header\":{\"status\":\"FAILED\"},"
@@ -46,12 +44,9 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
             return;
         }
 
-        String transactionId =
-                UUID.randomUUID().toString();
-
         CarmFcmTransactionContext.initialize(
                 correlationId,
-                transactionId);
+                UUID.randomUUID().toString());
 
         try {
             filterChain.doFilter(request, response);

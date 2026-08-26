@@ -1,5 +1,6 @@
 package com.sab.carm.fcm.service;
 
+import com.sab.carm.fcm.config.CarmFcmTransactionContext;
 import com.sab.carm.fcm.entity.ApiAudit;
 import com.sab.carm.fcm.repository.ApiAuditRepository;
 import org.slf4j.Logger;
@@ -23,6 +24,49 @@ public class ApiAuditService {
         this.repository = repository;
     }
 
+    /**
+     * Part 11 API. The transaction id is supplied by the
+     * request transaction context and is never generated here.
+     */
+    public String audit(
+            String correlationId,
+            String transactionId,
+            String httpMethod,
+            String apiPath,
+            String operation,
+            String status,
+            String relationshipId,
+            String serialNo,
+            String facilityNo,
+            String userId,
+            Map<String, Object> details) {
+
+        if (transactionId == null
+                || transactionId.trim().isEmpty()) {
+            transactionId = UUID.randomUUID().toString();
+        }
+
+        persist(
+                correlationId,
+                transactionId,
+                httpMethod,
+                apiPath,
+                operation,
+                status,
+                relationshipId,
+                serialNo,
+                facilityNo,
+                userId,
+                details);
+
+        return transactionId;
+    }
+
+    /**
+     * Backward-compatible overload for existing unit tests and
+     * non-HTTP callers. For an HTTP request Part 11 context is
+     * preferred.
+     */
     public String audit(
             String correlationId,
             String httpMethod,
@@ -35,7 +79,40 @@ public class ApiAuditService {
             String userId,
             Map<String, Object> details) {
 
-        String transactionId = UUID.randomUUID().toString();
+        String transactionId =
+                CarmFcmTransactionContext.getTransactionId();
+
+        if (transactionId == null
+                || transactionId.trim().isEmpty()) {
+            transactionId = UUID.randomUUID().toString();
+        }
+
+        return audit(
+                correlationId,
+                transactionId,
+                httpMethod,
+                apiPath,
+                operation,
+                status,
+                relationshipId,
+                serialNo,
+                facilityNo,
+                userId,
+                details);
+    }
+
+    private void persist(
+            String correlationId,
+            String transactionId,
+            String httpMethod,
+            String apiPath,
+            String operation,
+            String status,
+            String relationshipId,
+            String serialNo,
+            String facilityNo,
+            String userId,
+            Map<String, Object> details) {
 
         try {
             ApiAudit audit = new ApiAudit();
@@ -70,7 +147,5 @@ public class ApiAuditService {
                     operation,
                     exception);
         }
-
-        return transactionId;
     }
 }

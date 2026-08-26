@@ -13,6 +13,21 @@ public class ApiAuditInterceptor implements HandlerInterceptor {
     public static final String CORRELATION_ID_HEADER =
             "X-CARM-FCM-CorrelationId";
 
+    public static final String TRANSACTION_ID_ATTRIBUTE =
+            "CARM_FCM_TRANSACTION_ID";
+
+    public static final String RELATIONSHIP_ID_ATTRIBUTE =
+            "CARM_FCM_RELATIONSHIP_ID";
+
+    public static final String SERIAL_NO_ATTRIBUTE =
+            "CARM_FCM_SERIAL_NO";
+
+    public static final String FACILITY_NO_ATTRIBUTE =
+            "CARM_FCM_FACILITY_NO";
+
+    public static final String USER_ID_ATTRIBUTE =
+            "CARM_FCM_USER_ID";
+
     private final ApiAuditService auditService;
 
     public ApiAuditInterceptor(ApiAuditService auditService) {
@@ -38,8 +53,23 @@ public class ApiAuditInterceptor implements HandlerInterceptor {
             return;
         }
 
+        String transactionId =
+                CarmFcmTransactionContext.getTransactionId();
+
+        if (transactionId == null
+                || transactionId.trim().isEmpty()) {
+            Object attribute =
+                    request.getAttribute(
+                            TRANSACTION_ID_ATTRIBUTE);
+
+            if (attribute != null) {
+                transactionId = attribute.toString();
+            }
+        }
+
         auditService.audit(
                 correlationId,
+                transactionId,
                 request.getMethod(),
                 request.getRequestURI(),
                 resolveOperation(
@@ -48,11 +78,38 @@ public class ApiAuditInterceptor implements HandlerInterceptor {
                 response.getStatus() >= 400
                         ? "FAILED"
                         : "SUCCESS",
-                request.getParameter("relationshipId"),
-                request.getParameter("serialNo"),
-                request.getParameter("facilityNo"),
-                null,
+                value(
+                        request,
+                        RELATIONSHIP_ID_ATTRIBUTE,
+                        "relationshipId"),
+                value(
+                        request,
+                        SERIAL_NO_ATTRIBUTE,
+                        "serialNo"),
+                value(
+                        request,
+                        FACILITY_NO_ATTRIBUTE,
+                        "facilityNo"),
+                value(
+                        request,
+                        USER_ID_ATTRIBUTE,
+                        "userId"),
                 null);
+    }
+
+    private String value(
+            HttpServletRequest request,
+            String attributeName,
+            String parameterName) {
+
+        Object attribute =
+                request.getAttribute(attributeName);
+
+        if (attribute != null) {
+            return attribute.toString();
+        }
+
+        return request.getParameter(parameterName);
     }
 
     private String resolveOperation(

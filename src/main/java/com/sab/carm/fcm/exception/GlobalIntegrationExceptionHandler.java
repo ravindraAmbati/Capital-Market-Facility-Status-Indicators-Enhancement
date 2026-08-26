@@ -1,6 +1,7 @@
 package com.sab.carm.fcm.exception;
 
 import com.sab.carm.fcm.config.ApiAuditInterceptor;
+import com.sab.carm.fcm.config.IntegrationResponseHeaderFactory;
 import com.sab.carm.fcm.dto.integration.IntegrationResponseHeader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -82,14 +82,9 @@ public class GlobalIntegrationExceptionHandler {
                 request.getHeader(
                         ApiAuditInterceptor.CORRELATION_ID_HEADER);
 
-        String transactionId =
-                UUID.randomUUID().toString();
-
         IntegrationResponseHeader header =
-                new IntegrationResponseHeader(
-                        correlationId,
-                        transactionId,
-                        "FAILED");
+                IntegrationResponseHeaderFactory.failed(
+                        correlationId);
 
         return ResponseEntity
                 .status(status)

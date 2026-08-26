@@ -1,16 +1,17 @@
 package com.sab.carm.fcm.controller;
 
+import com.sab.carm.fcm.config.ApiAuditRequestContext;
+import com.sab.carm.fcm.config.IntegrationResponseHeaderFactory;
 import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersOperationResponse;
 import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersRequest;
 import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersResponse;
 import com.sab.carm.fcm.dto.integration.IntegrationResponse;
-import com.sab.carm.fcm.dto.integration.IntegrationResponseHeader;
 import com.sab.carm.fcm.service.FacilityCapitalMarkersService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/carm/fcm/facility")
@@ -27,37 +28,54 @@ public class FacilityCapitalMarkersController {
     }
 
     @GetMapping
-    public ResponseEntity<IntegrationResponse<FacilityCapitalMarkersResponse>> get(
+    public ResponseEntity<
+            IntegrationResponse<FacilityCapitalMarkersResponse>> get(
             @RequestHeader(CORRELATION_ID_HEADER) String correlationId,
             @RequestParam String relationshipId,
             @RequestParam String serialNo,
-            @RequestParam String facilityNo) {
+            @RequestParam String facilityNo,
+            HttpServletRequest request) {
 
-        return service.find(relationshipId, serialNo, facilityNo)
+        ApiAuditRequestContext.setRelationshipId(
+                request, relationshipId);
+        ApiAuditRequestContext.setSerialNo(
+                request, serialNo);
+        ApiAuditRequestContext.setFacilityNo(
+                request, facilityNo);
+
+        return service.find(
+                        relationshipId, serialNo, facilityNo)
                 .map(response -> ResponseEntity.ok(
                         new IntegrationResponse<>(
-                                new IntegrationResponseHeader(
-                                        correlationId,
-                                        UUID.randomUUID().toString(),
-                                        "SUCCESS"),
+                                IntegrationResponseHeaderFactory.success(
+                                        correlationId),
                                 response)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(
+                        () -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<IntegrationResponse<FacilityCapitalMarkersOperationResponse>> post(
+    public ResponseEntity<
+            IntegrationResponse<
+                    FacilityCapitalMarkersOperationResponse>> post(
             @RequestHeader(CORRELATION_ID_HEADER) String correlationId,
-            @Valid @RequestBody FacilityCapitalMarkersRequest request) {
+            @Valid @RequestBody FacilityCapitalMarkersRequest requestBody,
+            HttpServletRequest request) {
+
+        ApiAuditRequestContext.setRelationshipId(
+                request, requestBody.getCreditApplicationRelationshipId());
+        ApiAuditRequestContext.setSerialNo(
+                request, requestBody.getSerialNo());
+        ApiAuditRequestContext.setFacilityNo(
+                request, requestBody.getFacilityNo());
 
         FacilityCapitalMarkersOperationResponse operation =
-                service.upsert(request, correlationId);
+                service.upsert(requestBody, correlationId);
 
         return ResponseEntity.ok(
                 new IntegrationResponse<>(
-                        new IntegrationResponseHeader(
-                                correlationId,
-                                UUID.randomUUID().toString(),
-                                "SUCCESS"),
+                        IntegrationResponseHeaderFactory.success(
+                                correlationId),
                         operation));
     }
 
@@ -66,7 +84,15 @@ public class FacilityCapitalMarkersController {
             @RequestHeader(CORRELATION_ID_HEADER) String correlationId,
             @RequestParam String relationshipId,
             @RequestParam String serialNo,
-            @RequestParam String facilityNo) {
+            @RequestParam String facilityNo,
+            HttpServletRequest request) {
+
+        ApiAuditRequestContext.setRelationshipId(
+                request, relationshipId);
+        ApiAuditRequestContext.setSerialNo(
+                request, serialNo);
+        ApiAuditRequestContext.setFacilityNo(
+                request, facilityNo);
 
         boolean deleted = service.delete(
                 relationshipId,
@@ -80,10 +106,8 @@ public class FacilityCapitalMarkersController {
 
         return ResponseEntity.ok(
                 new IntegrationResponse<>(
-                        new IntegrationResponseHeader(
-                                correlationId,
-                                UUID.randomUUID().toString(),
-                                "SUCCESS"),
+                        IntegrationResponseHeaderFactory.success(
+                                correlationId),
                         null));
     }
 }

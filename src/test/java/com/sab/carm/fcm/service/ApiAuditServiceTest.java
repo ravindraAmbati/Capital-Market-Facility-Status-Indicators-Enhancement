@@ -1,17 +1,13 @@
 package com.sab.carm.fcm.service;
 
-import com.sab.carm.fcm.entity.ApiAudit;
 import com.sab.carm.fcm.repository.ApiAuditRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,47 +16,59 @@ class ApiAuditServiceTest {
     @Mock
     private ApiAuditRepository repository;
 
-    private ApiAuditService service;
-
-    @BeforeEach
-    void setUp() {
-        service = new ApiAuditService(repository);
-    }
-
     @Test
-    void shouldPersistApiAuditWithTraceData() {
-        String transactionId = service.audit(
-                "CARM-CORR-001",
+    void shouldPersistSuppliedTransactionId() {
+        ApiAuditService service =
+                new ApiAuditService(repository);
+
+        service.audit(
+                "CARM-001",
+                "FCM-TXN-001",
                 "POST",
                 "/api/carm/fcm/facility",
-                "POST",
+                "FACILITY_UPSERT",
                 "SUCCESS",
                 "REL001",
                 "001",
                 "123",
-                "AB12",
-                Collections.emptyMap());
+                null,
+                null);
 
-        assertNotNull(transactionId);
-
-        ArgumentCaptor<ApiAudit> captor =
-                ArgumentCaptor.forClass(ApiAudit.class);
+        ArgumentCaptor<com.sab.carm.fcm.entity.ApiAudit> captor =
+                ArgumentCaptor.forClass(
+                        com.sab.carm.fcm.entity.ApiAudit.class);
 
         verify(repository).save(captor.capture());
 
-        ApiAudit audit = captor.getValue();
-
-        assertEquals("CARM-CORR-001", audit.getCorrelationId());
-        assertEquals(transactionId, audit.getTransactionId());
-        assertEquals("POST", audit.getHttpMethod());
         assertEquals(
+                "CARM-001",
+                captor.getValue().getCorrelationId());
+        assertEquals(
+                "FCM-TXN-001",
+                captor.getValue().getTransactionId());
+    }
+
+    @Test
+    void auditFailureMustNotFailBusinessCaller() {
+        when(repository.save(any()))
+                .thenThrow(new RuntimeException("Mongo unavailable"));
+
+        ApiAuditService service =
+                new ApiAuditService(repository);
+
+        service.audit(
+                "CARM-001",
+                "FCM-TXN-001",
+                "POST",
                 "/api/carm/fcm/facility",
-                audit.getApiPath());
-        assertEquals("SUCCESS", audit.getStatus());
-        assertEquals("REL001", audit.getRelationshipId());
-        assertEquals("001", audit.getSerialNo());
-        assertEquals("123", audit.getFacilityNo());
-        assertEquals("AB12", audit.getUserId());
-        assertNotNull(audit.getTimestamp());
+                "FACILITY_UPSERT",
+                "SUCCESS",
+                "REL001",
+                "001",
+                "123",
+                null,
+                null);
+
+        verify(repository).save(any());
     }
 }

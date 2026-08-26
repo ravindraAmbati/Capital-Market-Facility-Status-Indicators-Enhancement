@@ -1,5 +1,6 @@
 package com.sab.carm.fcm.controller;
 
+import com.sab.carm.fcm.config.CarmFcmTransactionContext;
 import com.sab.carm.fcm.dto.integration.CreditApplicationReportResponse;
 import com.sab.carm.fcm.service.CreditApplicationReportCsvWriter;
 import com.sab.carm.fcm.service.CreditApplicationReportService;
@@ -19,6 +20,9 @@ public class CreditApplicationReportController {
     public static final String CORRELATION_ID_HEADER =
             "X-CARM-FCM-CorrelationId";
 
+    public static final String TRANSACTION_ID_HEADER =
+            "X-CARM-FCM-TransactionId";
+
     private final CreditApplicationReportService service;
     private final CreditApplicationReportCsvWriter csvWriter;
 
@@ -36,19 +40,39 @@ public class CreditApplicationReportController {
             @RequestParam String serialNo) {
 
         CreditApplicationReportResponse report =
-                service.getReport(relationshipId, serialNo);
+                service.getReport(
+                        relationshipId,
+                        serialNo);
 
         String csv = csvWriter.write(report);
 
-        return ResponseEntity.ok()
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\""
-                                + relationshipId
-                                + "_"
-                                + serialNo
-                                + "_facility-capital-markers.csv\"")
-                .contentType(MediaType.parseMediaType("text/csv"))
-                .body(csv);
+        ResponseEntity.BodyBuilder builder =
+                ResponseEntity.ok()
+                        .header(
+                                CORRELATION_ID_HEADER,
+                                correlationId)
+                        .header(
+                                HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=\""
+                                        + relationshipId
+                                        + "_"
+                                        + serialNo
+                                        + "_facility-capital-markers.csv\"")
+                        .contentType(
+                                MediaType.parseMediaType(
+                                        "text/csv"));
+
+        String transactionId =
+                CarmFcmTransactionContext
+                        .getTransactionId();
+
+        if (transactionId != null
+                && !transactionId.trim().isEmpty()) {
+            builder.header(
+                    TRANSACTION_ID_HEADER,
+                    transactionId);
+        }
+
+        return builder.body(csv);
     }
 }
