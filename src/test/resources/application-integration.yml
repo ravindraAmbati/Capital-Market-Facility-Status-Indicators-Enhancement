@@ -1,0 +1,6 @@
+# Used only by Part 13 real-MongoDB integration tests.
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_IT_URI}
+      auto-index-creation: true
