@@ -23,7 +23,9 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (!request.getRequestURI().startsWith("/api/")) {
+        // Mandatory only for CARM-FCM integration APIs.
+        // UI, maintenance and security APIs do not require it.
+        if (!isCarmFcmIntegrationRequest(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -33,14 +35,16 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
 
         if (correlationId == null
                 || correlationId.trim().isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+            response.setStatus(
+                    HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType("application/json");
             response.getWriter().write(
                     "{\"header\":{\"status\":\"FAILED\"},"
                             + "\"body\":{\"code\":\"MISSING_CORRELATION_ID\","
                             + "\"message\":\""
                             + CORRELATION_ID_HEADER
-                            + " header is mandatory\"}}");
+                            + " header is mandatory for CARM-FCM integration APIs\"}}");
             return;
         }
 
@@ -53,5 +57,14 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
         } finally {
             CarmFcmTransactionContext.clear();
         }
+    }
+
+    private boolean isCarmFcmIntegrationRequest(
+            HttpServletRequest request) {
+
+        String uri = request.getRequestURI();
+
+        return uri.startsWith("/api/carm/fcm/")
+                || uri.startsWith("/api/carm/reference-data/");
     }
 }

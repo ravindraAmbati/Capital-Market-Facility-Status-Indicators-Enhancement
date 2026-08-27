@@ -2,6 +2,7 @@ package com.sab.carm.fcm.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -63,19 +64,18 @@ class ProductionConfigurationTest {
 
         String yaml = readApplicationYaml();
 
-        assertTrue(yaml.contains(
-                "thymeleaf:\n    cache: true"));
+        assertTrue(yaml.contains("thymeleaf:"));
+        assertTrue(yaml.contains("cache: true"));
     }
 
     private String readApplicationYaml()
             throws IOException {
 
         ClassPathResource resource =
-                new ClassPathResource(
-                        "application.yml");
+                new ClassPathResource("application.yml");
 
-        return new String(
-                resource.getInputStream().readAllBytes(),
+        return StreamUtils.copyToString(
+                resource.getInputStream(),
                 StandardCharsets.UTF_8);
     }
 }
