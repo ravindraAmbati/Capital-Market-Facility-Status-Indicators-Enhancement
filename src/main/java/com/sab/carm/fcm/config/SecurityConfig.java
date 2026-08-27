@@ -2,7 +2,6 @@ package com.sab.carm.fcm.config;
 
 import com.sab.carm.fcm.filter.AuthorizationFilter;
 import com.sab.carm.fcm.filter.BearerTokenAuthenticationFilter;
-import com.sab.carm.fcm.filter.CorrelationIdFilter;
 import com.sab.carm.fcm.filter.RequestLoggingFilter;
 import com.sab.carm.fcm.filter.SecurityExceptionFilter;
 import com.sab.carm.fcm.security.LdapAuthenticationProvider;

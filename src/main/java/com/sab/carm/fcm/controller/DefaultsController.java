@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class DefaultsController {
 
     public static final String CORRELATION_ID_HEADER =
-            "X-CARM-FCM-CorrelationId";
+            IntegrationResponseHeaderFactory.CORRELATION_ID_HEADER;
 
     private final MaintenanceService maintenanceService;
 
@@ -47,7 +48,7 @@ public class DefaultsController {
     })
     @GetMapping(value = "/defaults",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public IntegrationResponse<DefaultsResponse> getDefaults(
+    public ResponseEntity<IntegrationResponse<DefaultsResponse>> getDefaults(
             @Parameter(
                     name = CORRELATION_ID_HEADER,
                     description = "Mandatory CARM-supplied correlation ID used "
@@ -58,8 +59,12 @@ public class DefaultsController {
 
         DefaultsResponse body = maintenanceService.getDefaults();
 
-        return new IntegrationResponse<>(
-                IntegrationResponseHeaderFactory.success(correlationId),
-                body);
+        return ResponseEntity.ok()
+                .headers(IntegrationResponseHeaderFactory
+                        .httpHeaders(correlationId))
+                .body(new IntegrationResponse<>(
+                        IntegrationResponseHeaderFactory.success(
+                                correlationId),
+                        body));
     }
 }

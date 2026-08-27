@@ -1,6 +1,5 @@
 package com.sab.carm.fcm.exception;
 
-import com.sab.carm.fcm.config.ApiAuditInterceptor;
 import com.sab.carm.fcm.config.IntegrationResponseHeaderFactory;
 import com.sab.carm.fcm.dto.integration.IntegrationResponseHeader;
 import org.springframework.http.HttpStatus;
@@ -23,17 +22,13 @@ public class GlobalIntegrationExceptionHandler {
         String message = exception.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error ->
-                        error.getField()
-                                + ": "
-                                + error.getDefaultMessage())
+                .map(error -> error.getField()
+                        + ": "
+                        + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
 
-        return error(
-                request,
-                HttpStatus.BAD_REQUEST,
-                "VALIDATION_ERROR",
-                message);
+        return error(request, HttpStatus.BAD_REQUEST,
+                "VALIDATION_ERROR", message);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -41,11 +36,8 @@ public class GlobalIntegrationExceptionHandler {
             IllegalArgumentException exception,
             HttpServletRequest request) {
 
-        return error(
-                request,
-                HttpStatus.BAD_REQUEST,
-                "INVALID_REQUEST",
-                exception.getMessage());
+        return error(request, HttpStatus.BAD_REQUEST,
+                "INVALID_REQUEST", exception.getMessage());
     }
 
     @ExceptionHandler(IllegalStateException.class)
@@ -53,11 +45,8 @@ public class GlobalIntegrationExceptionHandler {
             IllegalStateException exception,
             HttpServletRequest request) {
 
-        return error(
-                request,
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "PROCESSING_ERROR",
-                exception.getMessage());
+        return error(request, HttpStatus.INTERNAL_SERVER_ERROR,
+                "PROCESSING_ERROR", exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
@@ -65,9 +54,7 @@ public class GlobalIntegrationExceptionHandler {
             Exception exception,
             HttpServletRequest request) {
 
-        return error(
-                request,
-                HttpStatus.INTERNAL_SERVER_ERROR,
+        return error(request, HttpStatus.INTERNAL_SERVER_ERROR,
                 "INTERNAL_ERROR",
                 "An unexpected error occurred");
     }
@@ -80,7 +67,8 @@ public class GlobalIntegrationExceptionHandler {
 
         String correlationId =
                 request.getHeader(
-                        ApiAuditInterceptor.CORRELATION_ID_HEADER);
+                        IntegrationResponseHeaderFactory
+                                .CORRELATION_ID_HEADER);
 
         IntegrationResponseHeader header =
                 IntegrationResponseHeaderFactory.failed(
@@ -88,6 +76,8 @@ public class GlobalIntegrationExceptionHandler {
 
         return ResponseEntity
                 .status(status)
+                .headers(IntegrationResponseHeaderFactory
+                        .httpHeaders(correlationId))
                 .body(new IntegrationErrorResponse(
                         header,
                         new IntegrationErrorResponse.ErrorBody(

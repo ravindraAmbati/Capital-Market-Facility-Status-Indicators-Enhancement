@@ -18,7 +18,7 @@ import javax.validation.Valid;
 public class FacilityCapitalMarkersController {
 
     public static final String CORRELATION_ID_HEADER =
-            "X-CARM-FCM-CorrelationId";
+            IntegrationResponseHeaderFactory.CORRELATION_ID_HEADER;
 
     private final FacilityCapitalMarkersService service;
 
@@ -36,28 +36,24 @@ public class FacilityCapitalMarkersController {
             @RequestParam String facilityNo,
             HttpServletRequest request) {
 
-        ApiAuditRequestContext.setRelationshipId(
-                request, relationshipId);
-        ApiAuditRequestContext.setSerialNo(
-                request, serialNo);
-        ApiAuditRequestContext.setFacilityNo(
-                request, facilityNo);
+        ApiAuditRequestContext.setRelationshipId(request, relationshipId);
+        ApiAuditRequestContext.setSerialNo(request, serialNo);
+        ApiAuditRequestContext.setFacilityNo(request, facilityNo);
 
-        return service.find(
-                        relationshipId, serialNo, facilityNo)
-                .map(response -> ResponseEntity.ok(
-                        new IntegrationResponse<>(
+        return service.find(relationshipId, serialNo, facilityNo)
+                .map(response -> ResponseEntity.ok()
+                        .headers(IntegrationResponseHeaderFactory
+                                .httpHeaders(correlationId))
+                        .body(new IntegrationResponse<>(
                                 IntegrationResponseHeaderFactory.success(
                                         correlationId),
                                 response)))
-                .orElseGet(
-                        () -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<
-            IntegrationResponse<
-                    FacilityCapitalMarkersOperationResponse>> post(
+            IntegrationResponse<FacilityCapitalMarkersOperationResponse>> post(
             @RequestHeader(CORRELATION_ID_HEADER) String correlationId,
             @Valid @RequestBody FacilityCapitalMarkersRequest requestBody,
             HttpServletRequest request) {
@@ -72,8 +68,10 @@ public class FacilityCapitalMarkersController {
         FacilityCapitalMarkersOperationResponse operation =
                 service.upsert(requestBody, correlationId);
 
-        return ResponseEntity.ok(
-                new IntegrationResponse<>(
+        return ResponseEntity.ok()
+                .headers(IntegrationResponseHeaderFactory
+                        .httpHeaders(correlationId))
+                .body(new IntegrationResponse<>(
                         IntegrationResponseHeaderFactory.success(
                                 correlationId),
                         operation));
@@ -87,12 +85,9 @@ public class FacilityCapitalMarkersController {
             @RequestParam String facilityNo,
             HttpServletRequest request) {
 
-        ApiAuditRequestContext.setRelationshipId(
-                request, relationshipId);
-        ApiAuditRequestContext.setSerialNo(
-                request, serialNo);
-        ApiAuditRequestContext.setFacilityNo(
-                request, facilityNo);
+        ApiAuditRequestContext.setRelationshipId(request, relationshipId);
+        ApiAuditRequestContext.setSerialNo(request, serialNo);
+        ApiAuditRequestContext.setFacilityNo(request, facilityNo);
 
         boolean deleted = service.delete(
                 relationshipId,
@@ -104,8 +99,10 @@ public class FacilityCapitalMarkersController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(
-                new IntegrationResponse<>(
+        return ResponseEntity.ok()
+                .headers(IntegrationResponseHeaderFactory
+                        .httpHeaders(correlationId))
+                .body(new IntegrationResponse<>(
                         IntegrationResponseHeaderFactory.success(
                                 correlationId),
                         null));

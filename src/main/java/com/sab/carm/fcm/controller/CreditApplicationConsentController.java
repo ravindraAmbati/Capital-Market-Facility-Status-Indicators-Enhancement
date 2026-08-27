@@ -18,7 +18,7 @@ import javax.validation.Valid;
 public class CreditApplicationConsentController {
 
     public static final String CORRELATION_ID_HEADER =
-            "X-CARM-FCM-CorrelationId";
+            IntegrationResponseHeaderFactory.CORRELATION_ID_HEADER;
 
     private final CreditApplicationConsentService service;
 
@@ -46,8 +46,10 @@ public class CreditApplicationConsentController {
         CreditApplicationConsentResponse body =
                 service.addConsent(requestBody, correlationId);
 
-        return ResponseEntity.ok(
-                new IntegrationResponse<>(
+        return ResponseEntity.ok()
+                .headers(IntegrationResponseHeaderFactory
+                        .httpHeaders(correlationId))
+                .body(new IntegrationResponse<>(
                         IntegrationResponseHeaderFactory.success(
                                 correlationId),
                         body));

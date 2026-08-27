@@ -6,6 +6,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.sab.carm.fcm.config.CorrelationConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -31,7 +33,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         } finally {
             long elapsed = System.currentTimeMillis() - started;
             LOGGER.info("correlationId={} timestamp={} username={} method={} url={} executionTimeMs={} status={}",
-                    MDC.get(CorrelationIdFilter.MDC_KEY), Instant.now(), username(), request.getMethod(),
+                    MDC.get(CorrelationConstants.MDC_CORRELATION_ID), Instant.now(), username(), request.getMethod(),
                     request.getRequestURI(), elapsed, response.getStatus());
         }
     }
