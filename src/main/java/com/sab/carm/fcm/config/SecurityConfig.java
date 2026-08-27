@@ -2,7 +2,6 @@ package com.sab.carm.fcm.config;
 
 import com.sab.carm.fcm.filter.AuthorizationFilter;
 import com.sab.carm.fcm.filter.BearerTokenAuthenticationFilter;
-import com.sab.carm.fcm.filter.CorrelationIdFilter;
 import com.sab.carm.fcm.filter.RequestLoggingFilter;
 import com.sab.carm.fcm.filter.SecurityExceptionFilter;
 import com.sab.carm.fcm.security.LdapAuthenticationProvider;
@@ -14,19 +13,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Configures authentication and authorization for the application.
- *
- * Authentication:
- * - LDAP authentication provider
- * - Bearer token authentication
- *
- * Authorization:
- * - ADMIN
- * - API
- * - AUDIT
- * - ITSUP
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig
@@ -47,28 +33,17 @@ public class SecurityConfig
             AuthorizationFilter authorizationFilter,
             SecurityExceptionFilter securityExceptionFilter) {
 
-        this.authenticationProvider =
-                authenticationProvider;
-
+        this.authenticationProvider = authenticationProvider;
         this.bearerTokenAuthenticationFilter =
                 bearerTokenAuthenticationFilter;
-
-        this.correlationIdFilter =
-                correlationIdFilter;
-
-        this.requestLoggingFilter =
-                requestLoggingFilter;
-
-        this.authorizationFilter =
-                authorizationFilter;
-
-        this.securityExceptionFilter =
-                securityExceptionFilter;
+        this.correlationIdFilter = correlationIdFilter;
+        this.requestLoggingFilter = requestLoggingFilter;
+        this.authorizationFilter = authorizationFilter;
+        this.securityExceptionFilter = securityExceptionFilter;
     }
 
     @Override
-    protected void configure(
-            HttpSecurity http)
+    protected void configure(HttpSecurity http)
             throws Exception {
 
         http
@@ -80,9 +55,6 @@ public class SecurityConfig
 
                 .authorizeRequests()
 
-                /*
-                 * Authentication endpoints.
-                 */
                 .antMatchers(
                         "/api/security/authenticate",
                         "/login",
@@ -90,14 +62,6 @@ public class SecurityConfig
                         "/actuator/info")
                 .permitAll()
 
-                /*
-                 * Swagger/OpenAPI.
-                 *
-                 * Swagger is available only to users
-                 * authenticated with ADMIN, AUDIT or ITSUP.
-                 *
-                 * API service users do not need Swagger access.
-                 */
                 .antMatchers(
                         "/swagger-ui.html",
                         "/swagger-ui/**",
@@ -107,9 +71,6 @@ public class SecurityConfig
                         "AUDIT",
                         "ITSUP")
 
-                /*
-                 * Security session/profile endpoints.
-                 */
                 .antMatchers(
                         "/api/security/logout",
                         "/api/security/token",
@@ -121,19 +82,56 @@ public class SecurityConfig
                         "AUDIT",
                         "ITSUP")
 
-                /*
-                 * Administrative APIs.
-                 */
                 .antMatchers(
                         "/admin/**",
                         "/api/admin/**")
                 .hasRole("ADMIN")
 
                 /*
-                 * Read-only application APIs.
-                 *
-                 * AUDIT and ITSUP are allowed to read.
-                 * API users are also allowed to read.
+                 * FCM read APIs.
+                 * Reports/defaults/facility GET are available to
+                 * authenticated service and operational users.
+                 */
+                .antMatchers(
+                        HttpMethod.GET,
+                        "/api/carm/fcm/facility",
+                        "/api/carm/fcm/defaults",
+                        "/api/carm/fcm/report")
+                .hasAnyRole(
+                        "ADMIN",
+                        "API",
+                        "AUDIT",
+                        "ITSUP")
+
+                /*
+                 * FCM CARM integration write APIs.
+                 * API is the service-to-service role; ADMIN is
+                 * retained for controlled operational use.
+                 */
+                .antMatchers(
+                        HttpMethod.POST,
+                        "/api/carm/fcm/facility",
+                        "/api/carm/fcm/creditapplication")
+                .hasAnyRole(
+                        "ADMIN",
+                        "API")
+
+                /*
+                 * Facility deletion is part of the CARM-FCM
+                 * integration lifecycle. API must therefore be
+                 * authorized to perform DELETE; it is not limited
+                 * to a human ADMIN account.
+                 */
+                .antMatchers(
+                        HttpMethod.DELETE,
+                        "/api/carm/fcm/facility")
+                .hasAnyRole(
+                        "ADMIN",
+                        "API")
+
+                /*
+                 * Remaining application APIs retain the existing
+                 * broad authorization rules.
                  */
                 .antMatchers(
                         HttpMethod.GET,
@@ -144,13 +142,6 @@ public class SecurityConfig
                         "AUDIT",
                         "ITSUP")
 
-                /*
-                 * Write APIs are restricted to ADMIN/API.
-                 *
-                 * This is intentionally broad for the current
-                 * framework stage. Individual business APIs
-                 * can introduce more restrictive rules later.
-                 */
                 .antMatchers(
                         HttpMethod.POST,
                         "/api/**")
@@ -169,6 +160,7 @@ public class SecurityConfig
                         HttpMethod.DELETE,
                         "/api/**")
                 .hasRole("ADMIN")
+
                 .antMatchers(
                         HttpMethod.POST,
                         "/api/carm/reference-data/refresh/**")
@@ -192,9 +184,7 @@ public class SecurityConfig
                         "READONLY",
                         "ITSUP",
                         "AUDIT")
-                /*
-                 * Everything else requires authentication.
-                 */
+
                 .anyRequest()
                 .authenticated()
 
@@ -205,44 +195,22 @@ public class SecurityConfig
                 .logout()
                 .disable();
 
-        /*
-         * Exception handling must be early enough to
-         * capture security exceptions generated by
-         * downstream filters.
-         */
         http.addFilterBefore(
                 securityExceptionFilter,
                 UsernamePasswordAuthenticationFilter.class);
 
-        /*
-         * Correlation ID should be available to all
-         * subsequent security and application processing.
-         */
         http.addFilterBefore(
                 correlationIdFilter,
                 UsernamePasswordAuthenticationFilter.class);
 
-        /*
-         * Bearer token must be processed before the
-         * authorization filter.
-         */
         http.addFilterBefore(
                 bearerTokenAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class);
 
-        /*
-         * Authorization must run after bearer-token
-         * authentication has populated SecurityContext.
-         */
         http.addFilterAfter(
                 authorizationFilter,
                 BearerTokenAuthenticationFilter.class);
 
-        /*
-         * Request logging should happen after security
-         * processing so that the authenticated username
-         * is available.
-         */
         http.addFilterAfter(
                 requestLoggingFilter,
                 AuthorizationFilter.class);

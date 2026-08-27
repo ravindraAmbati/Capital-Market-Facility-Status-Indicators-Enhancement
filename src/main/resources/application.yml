@@ -8,11 +8,7 @@ spring:
       auto-index-creation: false
 
   thymeleaf:
-    cache: false
-
-################################################################################
-# Server
-################################################################################
+    cache: true
 
 server:
   port: 8080
@@ -20,10 +16,6 @@ server:
   servlet:
     session:
       timeout: 30m
-
-################################################################################
-# Management
-################################################################################
 
 management:
   endpoints:
@@ -33,25 +25,17 @@ management:
 
   endpoint:
     health:
-      show-details: always
+      show-details: when_authorized
 
   info:
     env:
-      enabled: true
-
-################################################################################
-# Application Information
-################################################################################
+      enabled: false
 
 info:
   app:
     name: CARM Facility Capital Markers
     version: 2026.08
     buildTimestamp: ${BUILD_TIMESTAMP:local}
-
-################################################################################
-# LDAP
-################################################################################
 
 ldap:
   initialContextFactory: com.sun.jndi.ldap.LdapCtxFactory
@@ -63,10 +47,6 @@ ldap:
   readTimeoutMillis: 5000
   bindUsername: sa-svc-carm-bind
   bindPassword: ENC(BIND-ACCOUNT-ENCRYPTED-PASSWORD)
-
-################################################################################
-# Security
-################################################################################
 
 security:
   authenticationMode: ldap
@@ -93,53 +73,29 @@ security:
       - sa-svc-carm-itsup
 
 mongodb:
-
   validateConnection: false
-
   initializeCollections: false
-
   initializeIndexes: false
 
   dbCollectionNames:
-
     facilityCapitalMarkers: facilityCapitalMarkers
-
     facilityCapitalMarkersDecisionHistory: facilityCapitalMarkersDecisionHistory
-
-    creditApplicationCapitalMarkersReport: creditApplicationCapitalMarkersReport
-
     applicationAuditLog: applicationAuditLog
-
     referenceDataMappings: referenceDataMappings
-
     facilityTypeMaintenance: facilityTypeMaintenance
-
     purposeCodeMaintenance: purposeCodeMaintenance
-
     maintenanceHistory: maintenanceHistory
-
-################################################################################
-# Swagger
-################################################################################
 
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
-
-################################################################################
-# Logging
-################################################################################
 
 logging:
   level:
     root: INFO
     org.springframework: INFO
     org.mongodb.driver: INFO
-    com.sab.carm.fcm: DEBUG
-
-################################################################################
-# CARM Reference Data
-################################################################################
+    com.sab.carm.fcm: INFO
 
 carm:
   api:
