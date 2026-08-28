@@ -1,0 +1,20 @@
+{
+  "facilityTypes": [
+    {
+      "facilityTypeCode": "FT001",
+      "facilityTypeDescription": "Existing Facility",
+      "advised": "Y",
+      "committed": "Y",
+      "active": true
+    }
+  ],
+  "purposeCodes": [
+    {
+      "purposeCodeHub": "HUB01",
+      "purposeCodeCarm": "PC01",
+      "description": "Existing Purpose",
+      "unconditionalCancellable": "Y",
+      "active": true
+    }
+  ]
+}

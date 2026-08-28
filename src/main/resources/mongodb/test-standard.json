@@ -1,0 +1,48 @@
+{
+  "facilityTypes": [
+    {
+      "facilityTypeCode": "FT001",
+      "facilityTypeDescription": "Revolving Credit",
+      "advised": "Y",
+      "committed": "Y",
+      "active": true
+    },
+    {
+      "facilityTypeCode": "FT002",
+      "facilityTypeDescription": "Term Loan",
+      "advised": "Y",
+      "committed": "N",
+      "active": true
+    },
+    {
+      "facilityTypeCode": "FT003",
+      "facilityTypeDescription": "Guarantee",
+      "advised": "N",
+      "committed": "Y",
+      "active": true
+    }
+  ],
+  "purposeCodes": [
+    {
+      "purposeCodeHub": "HUB01",
+      "purposeCodeCarm": "PC01",
+      "description": "Working Capital",
+      "unconditionalCancellable": "Y",
+      "active": true
+    },
+    {
+      "purposeCodeHub": "HUB02",
+      "purposeCodeCarm": "PC02",
+      "description": "General Corporate",
+      "unconditionalCancellable": "N",
+      "active": true
+    },
+    {
+      "purposeCodeHub": "HUB03",
+      "purposeCodeCarm": "PC03",
+      "description": "Trade Finance",
+      "unconditionalCancellable": "Y",
+      "active": true
+    }
+  ]
+}

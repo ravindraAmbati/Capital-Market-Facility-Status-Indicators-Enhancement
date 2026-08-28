@@ -1,0 +1,13 @@
+Apply the small integration changes below to the existing MaintenanceUiController.
+
+1. Inject UiMaintenanceDataService in addition to existing dependencies.
+2. At the beginning of maintenance(), call initialiseTestDataIfEnabled().
+3. loadModel() should use uiMaintenanceDataService.getFacilityTypes()/getPurposeCodes().
+4. For create/delete operations, branch when test-data mode is enabled:
+   - testDataService.saveFacilityType(...)
+   - testDataService.deleteFacilityType(...)
+   - testDataService.savePurposeCode(...)
+   - testDataService.deletePurposeCode(...)
+5. Keep the existing production path completely unchanged when test-data mode is false.
+
+This package intentionally does not replace the existing MaintenanceService.
