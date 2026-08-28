@@ -7,34 +7,368 @@
     <link rel="stylesheet" th:href="@{/css/admin-console.css}">
 </head>
 <body>
+
 <header class="app-header">
     <div class="brand">
         <div class="logo">FCM</div>
         <div class="app-name">CARM Facility Capital Markers</div>
     </div>
+
     <div class="header-right">
-        <span>User: <strong th:text="${#authentication.name}">user</strong></span>
-        <span>Session: <strong id="sessionTimer">30:00</strong></span>
-        <form th:action="@{/logout}" method="post" class="logout-form">
-            <button type="submit" class="btn btn-secondary">Logout</button>
+        <span>User:
+            <strong th:text="${#authentication.name}">user</strong>
+        </span>
+
+        <span>Session:
+            <strong id="sessionTimer">30:00</strong>
+        </span>
+
+        <form th:action="@{/logout}"
+              method="post"
+              class="logout-form">
+            <button type="submit"
+                    class="btn btn-secondary">
+                Logout
+            </button>
         </form>
     </div>
 </header>
 
 <main class="page-container">
+
     <div class="message-area" id="messageArea" aria-live="polite">
-        <div th:if="${param.error}" class="message message-error">
-            Unable to complete the requested operation.
+        <div th:if="${type == 'SUCCESS'}"
+             class="message message-success">
+            <span>✓</span>
+            <span th:text="${message}">
+                Operation completed successfully.
+            </span>
         </div>
-        <div th:if="${param.logout}" class="message message-success">
-            You have been logged out successfully.
+
+        <div th:if="${type == 'WARNING'}"
+             class="message message-warning">
+            <span>⚠</span>
+            <span th:text="${message}">
+                Please review the information.
+            </span>
+        </div>
+
+        <div th:if="${type == 'ERROR'}"
+             class="message message-error">
+            <span>✕</span>
+            <span th:text="${error}">
+                Unable to complete the operation.
+            </span>
         </div>
     </div>
 
-    <section class="page-card">
-        <h1>Logical Table Maintenance</h1>
-        <p>Administration console.</p>
-        <p>Maintenance screens will be available here.</p>
+    <section class="page-card maintenance-section">
+
+        <div class="section-header">
+            <div>
+                <h1>Logical Table Maintenance</h1>
+                <p class="section-description">
+                    Maintain facility types and purpose codes.
+                </p>
+            </div>
+
+            <button type="button"
+                    class="btn btn-primary"
+                    onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})">
+                Add Record
+            </button>
+        </div>
+
+        <section class="maintenance-card">
+            <div class="table-header">
+                <h2>Facility Types</h2>
+                <a class="btn btn-secondary"
+                   th:href="@{/maintenance}">
+                    Refresh
+                </a>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Description</th>
+                        <th>Advised</th>
+                        <th>Committed</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="item : ${facilityTypes}">
+                        <td th:text="${item.facilityTypeCode}">1200</td>
+                        <td th:text="${item.facilityTypeDescription}">
+                            Example
+                        </td>
+                        <td th:text="${item.advised}">Y</td>
+                        <td th:text="${item.committed}">Y</td>
+                        <td>
+                            <span class="status-active"
+                                  th:if="${item.active}">
+                                Active
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <button type="button"
+                                    class="btn btn-primary btn-small"
+                                    th:attr="data-code=${item.facilityTypeCode},
+                                             data-description=${item.facilityTypeDescription},
+                                             data-advised=${item.advised},
+                                             data-committed=${item.committed}"
+                                    onclick="editFacilityType(this)">
+                                Edit
+                            </button>
+
+                            <form th:action="@{/maintenance/facility-types/delete}"
+                                  method="post"
+                                  class="inline-form"
+                                  onsubmit="return confirmDelete('facility type');">
+                                <input type="hidden"
+                                       name="facilityTypeCode"
+                                       th:value="${item.facilityTypeCode}">
+                                <button type="submit"
+                                        class="btn btn-danger btn-small">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(facilityTypes)}">
+                        <td colspan="6"
+                            class="empty-state">
+                            No active facility types found.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="maintenance-card">
+            <div class="table-header">
+                <h2>Purpose Codes</h2>
+                <a class="btn btn-secondary"
+                   th:href="@{/maintenance}">
+                    Refresh
+                </a>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Hub Code</th>
+                        <th>CARM Code</th>
+                        <th>Description</th>
+                        <th>Unconditional Cancellable</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="item : ${purposeCodes}">
+                        <td th:text="${item.purposeCodeHub}">HUB01</td>
+                        <td th:text="${item.purposeCodeCarm}">PC01</td>
+                        <td th:text="${item.description}">
+                            Example
+                        </td>
+                        <td th:text="${item.unconditionalCancellable}">
+                            Y
+                        </td>
+                        <td>
+                            <span class="status-active"
+                                  th:if="${item.active}">
+                                Active
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <button type="button"
+                                    class="btn btn-primary btn-small"
+                                    th:attr="data-hub=${item.purposeCodeHub},
+                                             data-carm=${item.purposeCodeCarm},
+                                             data-description=${item.description},
+                                             data-unconditional=${item.unconditionalCancellable}"
+                                    onclick="editPurposeCode(this)">
+                                Edit
+                            </button>
+
+                            <form th:action="@{/maintenance/purpose-codes/delete}"
+                                  method="post"
+                                  class="inline-form"
+                                  onsubmit="return confirmDelete('purpose code');">
+                                <input type="hidden"
+                                       name="purposeCodeHub"
+                                       th:value="${item.purposeCodeHub}">
+                                <input type="hidden"
+                                       name="purposeCodeCarm"
+                                       th:value="${item.purposeCodeCarm}">
+                                <button type="submit"
+                                        class="btn btn-danger btn-small">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(purposeCodes)}">
+                        <td colspan="6"
+                            class="empty-state">
+                            No active purpose codes found.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="maintenance-card">
+            <div class="table-header">
+                <h2>Add / Edit Facility Type</h2>
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="resetFacilityForm()">
+                    Reset
+                </button>
+            </div>
+
+            <form th:action="@{/maintenance/facility-types/save}"
+                  method="post"
+                  id="facilityTypeForm"
+                  class="maintenance-form">
+
+                <input type="hidden"
+                       id="facilityIsNew"
+                       name="isNew"
+                       value="true">
+
+                <div class="form-grid">
+                    <label>
+                        Facility Type Code
+                        <input id="facilityTypeCode"
+                               name="facilityTypeCode"
+                               required>
+                    </label>
+
+                    <label>
+                        Description
+                        <input id="facilityTypeDescription"
+                               name="facilityTypeDescription"
+                               required>
+                    </label>
+
+                    <label>
+                        Advised
+                        <select id="facilityAdvised"
+                                name="advised"
+                                required>
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Committed
+                        <select id="facilityCommitted"
+                                name="committed"
+                                required>
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Save
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            onclick="resetFacilityForm()">
+                        Cancel / Reset
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="maintenance-card">
+            <div class="table-header">
+                <h2>Add / Edit Purpose Code</h2>
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="resetPurposeForm()">
+                    Reset
+                </button>
+            </div>
+
+            <form th:action="@{/maintenance/purpose-codes/save}"
+                  method="post"
+                  id="purposeCodeForm"
+                  class="maintenance-form">
+
+                <input type="hidden"
+                       id="purposeIsNew"
+                       name="isNew"
+                       value="true">
+
+                <div class="form-grid">
+                    <label>
+                        HUB Purpose Code
+                        <input id="purposeCodeHub"
+                               name="purposeCodeHub"
+                               required>
+                    </label>
+
+                    <label>
+                        CARM Purpose Code
+                        <input id="purposeCodeCarm"
+                               name="purposeCodeCarm"
+                               required>
+                    </label>
+
+                    <label>
+                        Description
+                        <input id="purposeDescription"
+                               name="description"
+                               required>
+                    </label>
+
+                    <label>
+                        Unconditional Cancellable
+                        <select id="purposeUnconditional"
+                                name="unconditionalCancellable"
+                                required>
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Save
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            onclick="resetPurposeForm()">
+                        Cancel / Reset
+                    </button>
+                </div>
+            </form>
+        </section>
+
     </section>
 </main>
 
@@ -44,5 +378,6 @@
 </footer>
 
 <script th:src="@{/js/session-timer.js}"></script>
+<script th:src="@{/js/maintenance.js}"></script>
 </body>
 </html>
