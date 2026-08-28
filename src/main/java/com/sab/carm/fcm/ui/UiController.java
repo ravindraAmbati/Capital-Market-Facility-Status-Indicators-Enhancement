@@ -11,11 +11,6 @@ public class UiController {
         return "redirect:/maintenance";
     }
 
-    @GetMapping("/maintenance")
-    public String maintenance() {
-        return "maintenance";
-    }
-
     @GetMapping("/403")
     public String accessDenied() {
         return "403";
