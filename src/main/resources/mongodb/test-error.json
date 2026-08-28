@@ -1,0 +1,20 @@
+{
+  "facilityTypes": [
+    {
+      "facilityTypeCode": "FTERR",
+      "facilityTypeDescription": "Error Scenario",
+      "advised": "Y",
+      "committed": "Y",
+      "active": true
+    }
+  ],
+  "purposeCodes": [
+    {
+      "purposeCodeHub": "HUBERR",
+      "purposeCodeCarm": "PCERR",
+      "description": "Error Scenario",
+      "unconditionalCancellable": "Y",
+      "active": true
+    }
+  ]
+}

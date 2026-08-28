@@ -1,21 +1,13 @@
 package com.sab.carm.fcm.ui;
 
-import com.sab.carm.fcm.dto.FacilityTypeIndicatorRequest;
-import com.sab.carm.fcm.dto.FacilityTypeMaintenanceResponse;
-import com.sab.carm.fcm.dto.PurposeCodeIndicatorRequest;
-import com.sab.carm.fcm.dto.PurposeCodeMaintenanceResponse;
-import com.sab.carm.fcm.entity.FacilityTypeMaintenance;
-import com.sab.carm.fcm.entity.PurposeCodeMaintenance;
-import com.sab.carm.fcm.repository.FacilityTypeMaintenanceRepository;
-import com.sab.carm.fcm.repository.PurposeCodeMaintenanceRepository;
 import com.sab.carm.fcm.service.MaintenanceService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Controller
 @RequestMapping("/maintenance")
@@ -23,17 +15,11 @@ import java.util.stream.Collectors;
 public class MaintenanceUiController {
 
     private final MaintenanceService maintenanceService;
-    private final FacilityTypeMaintenanceRepository facilityTypeRepository;
-    private final PurposeCodeMaintenanceRepository purposeCodeRepository;
 
     public MaintenanceUiController(
-            MaintenanceService maintenanceService,
-            FacilityTypeMaintenanceRepository facilityTypeRepository,
-            PurposeCodeMaintenanceRepository purposeCodeRepository) {
+            MaintenanceService maintenanceService) {
 
         this.maintenanceService = maintenanceService;
-        this.facilityTypeRepository = facilityTypeRepository;
-        this.purposeCodeRepository = purposeCodeRepository;
     }
 
     @GetMapping
@@ -43,7 +29,13 @@ public class MaintenanceUiController {
             @RequestParam(required = false) String error,
             Model model) {
 
-        loadModel(model);
+        model.addAttribute(
+                "facilityTypes",
+                maintenanceService.getFacilityTypes());
+
+        model.addAttribute(
+                "purposeCodes",
+                maintenanceService.getPurposeCodes());
 
         model.addAttribute("type", type);
         model.addAttribute("message", message);
@@ -58,67 +50,22 @@ public class MaintenanceUiController {
             @RequestParam String facilityTypeDescription,
             @RequestParam String advised,
             @RequestParam String committed,
-            @RequestParam(defaultValue = "false") boolean isNew) {
+            @RequestParam(defaultValue = "false")
+            boolean isNew) {
 
         try {
-            validateIndicator(advised);
-            validateIndicator(committed);
+            maintenanceService.saveFacilityType(
+                    facilityTypeCode,
+                    facilityTypeDescription,
+                    advised,
+                    committed,
+                    isNew);
 
-            if (isNew) {
-                if (facilityTypeRepository
-                        .findByFacilityTypeCode(facilityTypeCode)
-                        .isPresent()) {
-                    return redirectError(
-                            "Facility type already exists: " + facilityTypeCode);
-                }
-
-                FacilityTypeMaintenance entity =
-                        new FacilityTypeMaintenance();
-
-                entity.setFacilityTypeCode(facilityTypeCode);
-                entity.setFacilityTypeDescription(
-                        facilityTypeDescription);
-                entity.setAdvised(advised);
-                entity.setCommitted(committed);
-                entity.setActive(true);
-
-                facilityTypeRepository.save(entity);
-
-                return redirectSuccess(
-                        "Facility type added successfully.");
-            }
-
-            FacilityTypeMaintenanceResponse current =
-                    maintenanceService.getFacilityType(
-                            facilityTypeCode);
-
-            FacilityTypeIndicatorRequest request =
-                    new FacilityTypeIndicatorRequest();
-
-            request.setAdvised(advised);
-            request.setCommitted(committed);
-
-            maintenanceService.updateFacilityTypeIndicators(
-                    current.getFacilityTypeCode(),
-                    request);
-
-            FacilityTypeMaintenance entity =
-                    facilityTypeRepository
-                            .findByFacilityTypeCode(facilityTypeCode)
-                            .orElseThrow(() ->
-                                    new IllegalArgumentException(
-                                            "Facility type not found"));
-
-            entity.setFacilityTypeDescription(
-                    facilityTypeDescription);
-
-            facilityTypeRepository.save(entity);
-
-            return redirectSuccess(
-                    "Facility type updated successfully.");
+            return success(
+                    "Facility type saved successfully.");
 
         } catch (IllegalArgumentException exception) {
-            return redirectError(exception.getMessage());
+            return error(exception.getMessage());
         }
     }
 
@@ -127,21 +74,14 @@ public class MaintenanceUiController {
             @RequestParam String facilityTypeCode) {
 
         try {
-            FacilityTypeMaintenance entity =
-                    facilityTypeRepository
-                            .findByFacilityTypeCode(facilityTypeCode)
-                            .orElseThrow(() ->
-                                    new IllegalArgumentException(
-                                            "Facility type not found"));
+            maintenanceService.deleteFacilityType(
+                    facilityTypeCode);
 
-            entity.setActive(false);
-            facilityTypeRepository.save(entity);
-
-            return redirectSuccess(
+            return success(
                     "Facility type deleted successfully.");
 
         } catch (IllegalArgumentException exception) {
-            return redirectError(exception.getMessage());
+            return error(exception.getMessage());
         }
     }
 
@@ -151,65 +91,22 @@ public class MaintenanceUiController {
             @RequestParam String purposeCodeCarm,
             @RequestParam String description,
             @RequestParam String unconditionalCancellable,
-            @RequestParam(defaultValue = "false") boolean isNew) {
+            @RequestParam(defaultValue = "false")
+            boolean isNew) {
 
         try {
-            validateIndicator(unconditionalCancellable);
-
-            if (isNew) {
-                if (purposeCodeRepository
-                        .findByPurposeCodeHubAndPurposeCodeCarm(
-                                purposeCodeHub,
-                                purposeCodeCarm)
-                        .isPresent()) {
-                    return redirectError(
-                            "Purpose code already exists.");
-                }
-
-                PurposeCodeMaintenance entity =
-                        new PurposeCodeMaintenance();
-
-                entity.setPurposeCodeHub(purposeCodeHub);
-                entity.setPurposeCodeCarm(purposeCodeCarm);
-                entity.setDescription(description);
-                entity.setUnconditionalCancellable(
-                        unconditionalCancellable);
-                entity.setActive(true);
-
-                purposeCodeRepository.save(entity);
-
-                return redirectSuccess(
-                        "Purpose code added successfully.");
-            }
-
-            PurposeCodeIndicatorRequest request =
-                    new PurposeCodeIndicatorRequest();
-
-            request.setUnconditionalCancellable(
-                    unconditionalCancellable);
-
-            maintenanceService.updatePurposeCodeIndicator(
+            maintenanceService.savePurposeCode(
                     purposeCodeHub,
                     purposeCodeCarm,
-                    request);
+                    description,
+                    unconditionalCancellable,
+                    isNew);
 
-            PurposeCodeMaintenance entity =
-                    purposeCodeRepository
-                            .findByPurposeCodeHubAndPurposeCodeCarm(
-                                    purposeCodeHub,
-                                    purposeCodeCarm)
-                            .orElseThrow(() ->
-                                    new IllegalArgumentException(
-                                            "Purpose code not found"));
-
-            entity.setDescription(description);
-            purposeCodeRepository.save(entity);
-
-            return redirectSuccess(
-                    "Purpose code updated successfully.");
+            return success(
+                    "Purpose code saved successfully.");
 
         } catch (IllegalArgumentException exception) {
-            return redirectError(exception.getMessage());
+            return error(exception.getMessage());
         }
     }
 
@@ -219,58 +116,36 @@ public class MaintenanceUiController {
             @RequestParam String purposeCodeCarm) {
 
         try {
-            PurposeCodeMaintenance entity =
-                    purposeCodeRepository
-                            .findByPurposeCodeHubAndPurposeCodeCarm(
-                                    purposeCodeHub,
-                                    purposeCodeCarm)
-                            .orElseThrow(() ->
-                                    new IllegalArgumentException(
-                                            "Purpose code not found"));
+            maintenanceService.deletePurposeCode(
+                    purposeCodeHub,
+                    purposeCodeCarm);
 
-            entity.setActive(false);
-            purposeCodeRepository.save(entity);
-
-            return redirectSuccess(
+            return success(
                     "Purpose code deleted successfully.");
 
         } catch (IllegalArgumentException exception) {
-            return redirectError(exception.getMessage());
+            return error(exception.getMessage());
         }
     }
 
-    private void loadModel(Model model) {
+    private String success(String message) {
 
-        List<FacilityTypeMaintenanceResponse> facilityTypes =
-                maintenanceService.getFacilityTypes();
-
-        List<PurposeCodeMaintenanceResponse> purposeCodes =
-                maintenanceService.getPurposeCodes();
-
-        model.addAttribute("facilityTypes", facilityTypes);
-        model.addAttribute("purposeCodes", purposeCodes);
-    }
-
-    private void validateIndicator(String value) {
-        if (!"Y".equals(value) && !"N".equals(value)) {
-            throw new IllegalArgumentException(
-                    "Indicator must be Y or N.");
-        }
-    }
-
-    private String redirectSuccess(String message) {
         return "redirect:/maintenance?type=SUCCESS&message="
                 + encode(message);
     }
 
-    private String redirectError(String message) {
+    private String error(String message) {
+
         return "redirect:/maintenance?type=ERROR&error="
                 + encode(message);
     }
 
     private String encode(String value) {
-        return java.net.URLEncoder.encode(
-                value == null ? "Operation failed." : value,
-                java.nio.charset.StandardCharsets.UTF_8);
+
+        return URLEncoder.encode(
+                value == null
+                        ? "Operation failed."
+                        : value,
+                StandardCharsets.UTF_8);
     }
 }
