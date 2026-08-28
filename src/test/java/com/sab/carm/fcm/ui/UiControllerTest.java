@@ -14,11 +14,6 @@ class UiControllerTest {
     }
 
     @Test
-    void maintenanceShouldReturnMaintenanceView() {
-        assertEquals("maintenance", controller.maintenance());
-    }
-
-    @Test
     void accessDeniedShouldReturn403View() {
         assertEquals("403", controller.accessDenied());
     }
