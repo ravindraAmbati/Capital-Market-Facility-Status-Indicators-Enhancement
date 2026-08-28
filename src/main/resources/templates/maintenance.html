@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARM Facility Capital Markers - Maintenance</title>
+    <link rel="stylesheet" th:href="@{/css/admin-console.css}">
+</head>
+<body>
+<header class="app-header">
+    <div class="brand">
+        <div class="logo">FCM</div>
+        <div class="app-name">CARM Facility Capital Markers</div>
+    </div>
+    <div class="header-right">
+        <span>User: <strong th:text="${#authentication.name}">user</strong></span>
+        <span>Session: <strong id="sessionTimer">30:00</strong></span>
+        <form th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit" class="btn btn-secondary">Logout</button>
+        </form>
+    </div>
+</header>
+
+<main class="page-container">
+    <div class="message-area" id="messageArea" aria-live="polite">
+        <div th:if="${param.error}" class="message message-error">
+            Unable to complete the requested operation.
+        </div>
+        <div th:if="${param.logout}" class="message message-success">
+            You have been logged out successfully.
+        </div>
+    </div>
+
+    <section class="page-card">
+        <h1>Logical Table Maintenance</h1>
+        <p>Administration console.</p>
+        <p>Maintenance screens will be available here.</p>
+    </section>
+</main>
+
+<footer class="app-footer">
+    <span>CARM Facility Capital Markers</span>
+    <span>Version 1.0.0</span>
+</footer>
+
+<script th:src="@{/js/session-timer.js}"></script>
+</body>
+</html>
