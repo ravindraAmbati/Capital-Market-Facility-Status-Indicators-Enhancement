@@ -2,7 +2,7 @@
   "facilityTypes": [
     {
       "facilityTypeCode": "FT001",
-      "facilityTypeDescription": "Existing Facility",
+      "facilityTypeDescription": "Existing Facility Type",
       "advised": "Y",
       "committed": "Y",
       "active": true

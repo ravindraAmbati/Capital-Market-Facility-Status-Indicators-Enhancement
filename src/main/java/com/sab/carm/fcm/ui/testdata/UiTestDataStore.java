@@ -79,13 +79,12 @@ public class UiTestDataStore {
                 .collect(Collectors.toList());
     }
 
-    public synchronized boolean facilityTypeExists(
-            String code) {
-
+    public synchronized boolean facilityTypeExists(String code) {
         return findFacilityType(code) != null;
     }
 
-    public synchronized void saveFacilityType(
+    public synchronized FacilityTypeMaintenanceResponse
+    saveFacilityType(
             String code,
             String description,
             String advised,
@@ -108,6 +107,29 @@ public class UiTestDataStore {
         existing.setFacilityTypeDescription(description);
         existing.setAdvised(advised);
         existing.setCommitted(committed);
+        existing.setActive(true);
+
+        return facilityTypeResponse(existing);
+    }
+
+    public synchronized FacilityTypeMaintenanceResponse
+    updateFacilityType(
+            String code,
+            String advised,
+            String committed) {
+
+        UiTestDataFixture.FacilityTypeFixture existing =
+                findFacilityType(code);
+
+        if (existing == null || !existing.isActive()) {
+            throw new IllegalArgumentException(
+                    "Facility type not found: " + code);
+        }
+
+        existing.setAdvised(advised);
+        existing.setCommitted(committed);
+
+        return facilityTypeResponse(existing);
     }
 
     public synchronized void deleteFacilityType(
@@ -116,9 +138,12 @@ public class UiTestDataStore {
         UiTestDataFixture.FacilityTypeFixture existing =
                 findFacilityType(code);
 
-        if (existing != null) {
-            existing.setActive(false);
+        if (existing == null || !existing.isActive()) {
+            throw new IllegalArgumentException(
+                    "Facility type not found: " + code);
         }
+
+        existing.setActive(false);
     }
 
     public synchronized boolean purposeCodeExists(
@@ -128,7 +153,8 @@ public class UiTestDataStore {
         return findPurposeCode(hub, carm) != null;
     }
 
-    public synchronized void savePurposeCode(
+    public synchronized PurposeCodeMaintenanceResponse
+    savePurposeCode(
             String hub,
             String carm,
             String description,
@@ -152,6 +178,29 @@ public class UiTestDataStore {
         existing.setDescription(description);
         existing.setUnconditionalCancellable(
                 unconditionalCancellable);
+        existing.setActive(true);
+
+        return purposeCodeResponse(existing);
+    }
+
+    public synchronized PurposeCodeMaintenanceResponse
+    updatePurposeCode(
+            String hub,
+            String carm,
+            String unconditionalCancellable) {
+
+        UiTestDataFixture.PurposeCodeFixture existing =
+                findPurposeCode(hub, carm);
+
+        if (existing == null || !existing.isActive()) {
+            throw new IllegalArgumentException(
+                    "Purpose code not found");
+        }
+
+        existing.setUnconditionalCancellable(
+                unconditionalCancellable);
+
+        return purposeCodeResponse(existing);
     }
 
     public synchronized void deletePurposeCode(
@@ -161,9 +210,12 @@ public class UiTestDataStore {
         UiTestDataFixture.PurposeCodeFixture existing =
                 findPurposeCode(hub, carm);
 
-        if (existing != null) {
-            existing.setActive(false);
+        if (existing == null || !existing.isActive()) {
+            throw new IllegalArgumentException(
+                    "Purpose code not found");
         }
+
+        existing.setActive(false);
     }
 
     private UiTestDataFixture.FacilityTypeFixture
@@ -201,18 +253,11 @@ public class UiTestDataStore {
 
         response.setFacilityTypeCode(
                 item.getFacilityTypeCode());
-
         response.setFacilityTypeDescription(
                 item.getFacilityTypeDescription());
-
-        response.setAdvised(
-                item.getAdvised());
-
-        response.setCommitted(
-                item.getCommitted());
-
-        response.setActive(
-                item.isActive());
+        response.setAdvised(item.getAdvised());
+        response.setCommitted(item.getCommitted());
+        response.setActive(item.isActive());
 
         return response;
     }
@@ -226,18 +271,12 @@ public class UiTestDataStore {
 
         response.setPurposeCodeHub(
                 item.getPurposeCodeHub());
-
         response.setPurposeCodeCarm(
                 item.getPurposeCodeCarm());
-
-        response.setDescription(
-                item.getDescription());
-
+        response.setDescription(item.getDescription());
         response.setUnconditionalCancellable(
                 item.getUnconditionalCancellable());
-
-        response.setActive(
-                item.isActive());
+        response.setActive(item.isActive());
 
         return response;
     }
@@ -259,21 +298,13 @@ public class UiTestDataStore {
 
                     copy.setFacilityTypeCode(
                             item.getFacilityTypeCode());
-
                     copy.setFacilityTypeDescription(
                             item.getFacilityTypeDescription());
-
-                    copy.setAdvised(
-                            item.getAdvised());
-
-                    copy.setCommitted(
-                            item.getCommitted());
-
-                    copy.setActive(
-                            item.isActive());
+                    copy.setAdvised(item.getAdvised());
+                    copy.setCommitted(item.getCommitted());
+                    copy.setActive(item.isActive());
 
                     return copy;
-
                 })
                 .collect(Collectors.toList());
     }
@@ -295,21 +326,14 @@ public class UiTestDataStore {
 
                     copy.setPurposeCodeHub(
                             item.getPurposeCodeHub());
-
                     copy.setPurposeCodeCarm(
                             item.getPurposeCodeCarm());
-
-                    copy.setDescription(
-                            item.getDescription());
-
+                    copy.setDescription(item.getDescription());
                     copy.setUnconditionalCancellable(
                             item.getUnconditionalCancellable());
-
-                    copy.setActive(
-                            item.isActive());
+                    copy.setActive(item.isActive());
 
                     return copy;
-
                 })
                 .collect(Collectors.toList());
     }
