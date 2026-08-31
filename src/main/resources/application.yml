@@ -1,42 +1,34 @@
 spring:
   application:
     name: carm-facility-capital-markers
-
   data:
     mongodb:
-      uri: ENC(ENCRYPTED_MONGODB_CONNECTION_STRING)
+      database: carm_fcm
+      port: 0
       auto-index-creation: false
-
   thymeleaf:
     cache: true
-
 server:
   port: 8080
-
   servlet:
     session:
       timeout: 30m
-
 management:
   endpoints:
     web:
       exposure:
         include: health,info
-
   endpoint:
     health:
       show-details: when_authorized
-
   info:
     env:
       enabled: false
-
 info:
   app:
     name: CARM Facility Capital Markers
     version: 2026.08
     buildTimestamp: ${BUILD_TIMESTAMP:local}
-
 ldap:
   initialContextFactory: com.sun.jndi.ldap.LdapCtxFactory
   providerUrl: ldap://localhost:389
@@ -47,36 +39,27 @@ ldap:
   readTimeoutMillis: 5000
   bindUsername: sa-svc-carm-bind
   bindPassword: ENC(BIND-ACCOUNT-ENCRYPTED-PASSWORD)
-
 security:
   authenticationMode: ldap
-
   passwordPolicy:
     enabled: false
-
   token:
     expirationSeconds: 1800
     refreshWindowSeconds: 300
     sameOriginRequired: false
-
   roles:
     admin:
       - sa-svc-carm-admin
-
     api:
       - sa-svc-carm-api
-
     audit:
       - sa-svc-carm-audit
-
     itsup:
       - sa-svc-carm-itsup
-
 mongodb:
   validateConnection: false
   initializeCollections: false
   initializeIndexes: false
-
   dbCollectionNames:
     facilityCapitalMarkers: facilityCapitalMarkers
     facilityCapitalMarkersDecisionHistory: facilityCapitalMarkersDecisionHistory
@@ -85,36 +68,29 @@ mongodb:
     facilityTypeMaintenance: facilityTypeMaintenance
     purposeCodeMaintenance: purposeCodeMaintenance
     maintenanceHistory: maintenanceHistory
-
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
-
 logging:
   level:
     root: INFO
     org.springframework: INFO
     org.mongodb.driver: INFO
     com.sab.carm.fcm: INFO
-
 carm:
   api:
     base-url: https://{hostname}
     reference-data-path: /CarmDataService/referenceTable/data
     method: POST
     content-type: application/json
-
   site-id: ABCD
-
   reference-data:
     tables:
       - "1200"
       - "1060"
-
     defaults:
       facility-type:
         advised: "Y"
         committed: "Y"
-
       purpose-code:
         unconditional-cancellable: "Y"
