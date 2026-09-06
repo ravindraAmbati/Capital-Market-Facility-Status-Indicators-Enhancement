@@ -40,7 +40,7 @@ class FacilityCapitalMarkersServiceUpsertTest {
         FacilityCapitalMarkersRequest request = request("Y");
 
         when(repository
-                .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                .findByRelationshipIdAndSerialNoAndFacilityNo(
                         "REL001", "001", "123"))
                 .thenReturn(Optional.empty());
 
@@ -60,7 +60,7 @@ class FacilityCapitalMarkersServiceUpsertTest {
         FacilityCapitalMarkersRequest request = request("Y");
 
         when(repository
-                .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                .findByRelationshipIdAndSerialNoAndFacilityNo(
                         "REL001", "001", "123"))
                 .thenReturn(Optional.of(entity("Y")));
 
@@ -78,7 +78,7 @@ class FacilityCapitalMarkersServiceUpsertTest {
         FacilityCapitalMarkersRequest request = request("N");
 
         when(repository
-                .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                .findByRelationshipIdAndSerialNoAndFacilityNo(
                         "REL001", "001", "123"))
                 .thenReturn(Optional.of(current));
 
@@ -110,7 +110,7 @@ class FacilityCapitalMarkersServiceUpsertTest {
         FacilityCapitalMarkersRequest request =
                 new FacilityCapitalMarkersRequest();
 
-        request.setCreditApplicationRelationshipId("REL001");
+        request.setRelationshipId("REL001");
         request.setSerialNo("001");
         request.setFacilityNo("123");
         request.setFacilityType("FT01");
@@ -126,7 +126,7 @@ class FacilityCapitalMarkersServiceUpsertTest {
         FacilityCapitalMarkers entity =
                 new FacilityCapitalMarkers();
 
-        entity.setCreditApplicationRelationshipId("REL001");
+        entity.setRelationshipId("REL001");
         entity.setSerialNo("001");
         entity.setFacilityNo("123");
         entity.setFacilityType("FT01");

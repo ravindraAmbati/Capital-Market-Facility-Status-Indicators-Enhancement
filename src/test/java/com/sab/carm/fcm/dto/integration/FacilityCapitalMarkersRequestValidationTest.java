@@ -125,7 +125,7 @@ class FacilityCapitalMarkersRequestValidationTest {
         FacilityCapitalMarkersRequest request =
                 new FacilityCapitalMarkersRequest();
 
-        request.setCreditApplicationRelationshipId("REL001");
+        request.setRelationshipId("REL001");
         request.setSerialNo("001");
         request.setFacilityNo("123");
         request.setFacilityType("1200");

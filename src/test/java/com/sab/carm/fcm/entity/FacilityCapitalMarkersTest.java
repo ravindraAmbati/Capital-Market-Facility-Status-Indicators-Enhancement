@@ -14,7 +14,7 @@ class FacilityCapitalMarkersTest {
         FacilityCapitalMarkers markers =
                 new FacilityCapitalMarkers();
 
-        markers.setCreditApplicationRelationshipId(
+        markers.setRelationshipId(
                 "123456789");
 
         markers.setSerialNo("001");
@@ -71,7 +71,7 @@ class FacilityCapitalMarkersTest {
 
         assertEquals(
                 "123456789",
-                markers.getCreditApplicationRelationshipId());
+                markers.getRelationshipId());
 
         assertEquals(
                 "001",

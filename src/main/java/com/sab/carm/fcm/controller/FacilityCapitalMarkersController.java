@@ -59,7 +59,7 @@ public class FacilityCapitalMarkersController {
             HttpServletRequest request) {
 
         ApiAuditRequestContext.setRelationshipId(
-                request, requestBody.getCreditApplicationRelationshipId());
+                request, requestBody.getRelationshipId());
         ApiAuditRequestContext.setSerialNo(
                 request, requestBody.getSerialNo());
         ApiAuditRequestContext.setFacilityNo(

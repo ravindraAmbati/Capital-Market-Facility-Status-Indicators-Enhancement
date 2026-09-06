@@ -80,12 +80,12 @@ public class FacilityCapitalMarkersHistory extends BaseEntity {
     @Field("action")
     private String action;
 
-    public String getCreditApplicationRelationshipId() {
+    public String getRelationshipId() {
         return relationshipId;
     }
 
-    public void setCreditApplicationRelationshipId(String value) {
-        this.relationshipId = value;
+    public void setRelationshipId(String relationshipId) {
+        this.relationshipId = relationshipId;
     }
 
     public String getSerialNo() {

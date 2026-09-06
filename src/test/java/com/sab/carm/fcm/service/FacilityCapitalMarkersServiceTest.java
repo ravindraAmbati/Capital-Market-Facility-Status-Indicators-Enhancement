@@ -1,6 +1,5 @@
 package com.sab.carm.fcm.service;
 
-import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersRequest;
 import com.sab.carm.fcm.dto.integration.FacilityCapitalMarkersResponse;
 import com.sab.carm.fcm.entity.FacilityCapitalMarkers;
 import com.sab.carm.fcm.repository.FacilityCapitalMarkersHistoryRepository;
@@ -38,7 +37,7 @@ class FacilityCapitalMarkersServiceTest {
         FacilityCapitalMarkers entity = entity();
 
         when(repository
-                .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                .findByRelationshipIdAndSerialNoAndFacilityNo(
                         "REL001", "001", "123"))
                 .thenReturn(Optional.of(entity));
 
@@ -47,7 +46,7 @@ class FacilityCapitalMarkersServiceTest {
 
         assertTrue(result.isPresent());
         assertEquals("REL001",
-                result.get().getCreditApplicationRelationshipId());
+                result.get().getRelationshipId());
         assertEquals("001", result.get().getSerialNo());
         assertEquals("123", result.get().getFacilityNo());
         assertEquals("FT01", result.get().getFacilityType());
@@ -56,7 +55,7 @@ class FacilityCapitalMarkersServiceTest {
         assertTrue(result.get().getAdvised().isOverride());
 
         verify(repository)
-                .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                .findByRelationshipIdAndSerialNoAndFacilityNo(
                         "REL001", "001", "123");
         verifyNoInteractions(historyRepository);
     }
@@ -64,7 +63,7 @@ class FacilityCapitalMarkersServiceTest {
     @Test
     void shouldReturnEmptyWhenRecordDoesNotExist() {
         when(repository
-                .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                .findByRelationshipIdAndSerialNoAndFacilityNo(
                         "REL001", "001", "123"))
                 .thenReturn(Optional.empty());
 
@@ -77,7 +76,7 @@ class FacilityCapitalMarkersServiceTest {
 
     private FacilityCapitalMarkers entity() {
         FacilityCapitalMarkers entity = new FacilityCapitalMarkers();
-        entity.setCreditApplicationRelationshipId("REL001");
+        entity.setRelationshipId("REL001");
         entity.setSerialNo("001");
         entity.setFacilityNo("123");
         entity.setFacilityType("FT01");

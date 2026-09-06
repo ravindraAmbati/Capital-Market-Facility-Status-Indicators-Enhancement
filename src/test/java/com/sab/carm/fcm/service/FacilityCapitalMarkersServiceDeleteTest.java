@@ -39,7 +39,7 @@ class FacilityCapitalMarkersServiceDeleteTest {
         FacilityCapitalMarkers current = current();
 
         when(repository
-                .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                .findByRelationshipIdAndSerialNoAndFacilityNo(
                         "REL001", "001", "123"))
                 .thenReturn(Optional.of(current));
 
@@ -56,7 +56,7 @@ class FacilityCapitalMarkersServiceDeleteTest {
                         .equals(history.getFacilityNo())
                         && "123".equals(history.getOriginalFacilityNo())
                         && "REL001".equals(
-                                history.getCreditApplicationRelationshipId())
+                                history.getRelationshipId())
                         && "001".equals(history.getSerialNo())
                         && "DELETE".equals(history.getAction())
                         && "CARM-DELETE-001".equals(
@@ -69,7 +69,7 @@ class FacilityCapitalMarkersServiceDeleteTest {
     @Test
     void shouldNotDeleteAnythingWhenCurrentDoesNotExist() {
         when(repository
-                .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                .findByRelationshipIdAndSerialNoAndFacilityNo(
                         "REL001", "001", "123"))
                 .thenReturn(Optional.empty());
 
@@ -85,7 +85,7 @@ class FacilityCapitalMarkersServiceDeleteTest {
         FacilityCapitalMarkers entity =
                 new FacilityCapitalMarkers();
 
-        entity.setCreditApplicationRelationshipId("REL001");
+        entity.setRelationshipId("REL001");
         entity.setSerialNo("001");
         entity.setFacilityNo("123");
         entity.setCustomerId("CUST001");
