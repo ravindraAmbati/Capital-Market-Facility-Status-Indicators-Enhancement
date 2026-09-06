@@ -72,6 +72,7 @@ public class CreditApplicationReportService {
         row.setProposalType(entity.getProposalType());
         row.setApplicationStatus(entity.getApplicationStatus());
         row.setFacilityType(entity.getFacilityType());
+        row.setUnderlyingSystemId(entity.getUnderlyingSystemId());
         row.setCarmPurposeCode(entity.getCarmPurposeCode());
 
         if (entity.getAdvised() != null) {
