@@ -32,7 +32,7 @@ class FacilityCapitalMarkersHistoryTest {
         FacilityCapitalMarkersHistory history =
                 new FacilityCapitalMarkersHistory();
 
-        history.setCreditApplicationRelationshipId("REL001");
+        history.setRelationshipId("REL001");
         history.setSerialNo("001");
         history.setFacilityNo("123");
         history.setOriginalFacilityNo("123");
@@ -48,7 +48,7 @@ class FacilityCapitalMarkersHistoryTest {
         history.setUpdatedDateTime("20260826120000");
 
         assertEquals("REL001",
-                history.getCreditApplicationRelationshipId());
+                history.getRelationshipId());
         assertEquals("001", history.getSerialNo());
         assertEquals("123", history.getFacilityNo());
         assertEquals("123", history.getOriginalFacilityNo());

@@ -44,7 +44,7 @@ public class FacilityCapitalMarkersService {
             String facilityNo) {
 
         return repository
-                .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                .findByRelationshipIdAndSerialNoAndFacilityNo(
                         relationshipId, serialNo, facilityNo)
                 .map(this::toResponse);
     }
@@ -55,8 +55,8 @@ public class FacilityCapitalMarkersService {
 
         Optional<FacilityCapitalMarkers> existing =
                 repository
-                        .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
-                                request.getCreditApplicationRelationshipId(),
+                        .findByRelationshipIdAndSerialNoAndFacilityNo(
+                                request.getRelationshipId(),
                                 request.getSerialNo(),
                                 request.getFacilityNo());
 
@@ -100,7 +100,7 @@ public class FacilityCapitalMarkersService {
 
         Optional<FacilityCapitalMarkers> existing =
                 repository
-                        .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+                        .findByRelationshipIdAndSerialNoAndFacilityNo(
                                 relationshipId, serialNo, facilityNo);
 
         if (!existing.isPresent()) {
@@ -130,8 +130,8 @@ public class FacilityCapitalMarkersService {
             FacilityCapitalMarkersRequest request,
             String correlationId) {
 
-        entity.setCreditApplicationRelationshipId(
-                request.getCreditApplicationRelationshipId());
+        entity.setRelationshipId(
+                request.getRelationshipId());
         entity.setSerialNo(request.getSerialNo());
         entity.setFacilityNo(request.getFacilityNo());
         entity.setCustomerId(request.getCustomerId());
@@ -189,8 +189,8 @@ public class FacilityCapitalMarkersService {
         FacilityCapitalMarkersHistory history =
                 new FacilityCapitalMarkersHistory();
 
-        history.setCreditApplicationRelationshipId(
-                current.getCreditApplicationRelationshipId());
+        history.setRelationshipId(
+                current.getRelationshipId());
         history.setSerialNo(current.getSerialNo());
         history.setFacilityNo(current.getFacilityNo());
         history.setOriginalFacilityNo(current.getFacilityNo());
@@ -219,8 +219,8 @@ public class FacilityCapitalMarkersService {
             FacilityCapitalMarkers current,
             FacilityCapitalMarkersRequest request) {
 
-        return equal(current.getCreditApplicationRelationshipId(),
-                request.getCreditApplicationRelationshipId())
+        return equal(current.getRelationshipId(),
+                request.getRelationshipId())
                 && equal(current.getSerialNo(), request.getSerialNo())
                 && equal(current.getFacilityNo(), request.getFacilityNo())
                 && equal(current.getCustomerId(), request.getCustomerId())
@@ -275,8 +275,8 @@ public class FacilityCapitalMarkersService {
         FacilityCapitalMarkersResponse response =
                 new FacilityCapitalMarkersResponse();
 
-        response.setCreditApplicationRelationshipId(
-                entity.getCreditApplicationRelationshipId());
+        response.setRelationshipId(
+                entity.getRelationshipId());
         response.setSerialNo(entity.getSerialNo());
         response.setFacilityNo(entity.getFacilityNo());
         response.setCustomerId(entity.getCustomerId());

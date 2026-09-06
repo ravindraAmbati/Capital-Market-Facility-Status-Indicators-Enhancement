@@ -46,7 +46,7 @@ class FacilityCapitalMarkersServiceIT {
 
         assertEquals(FacilityOperation.CREATED, r.getOperation());
         assertTrue(repository
-            .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+            .findByRelationshipIdAndSerialNoAndFacilityNo(
                 REL, SERIAL, FACILITY).isPresent());
         assertEquals(0, historyRepository.count());
     }
@@ -83,7 +83,7 @@ class FacilityCapitalMarkersServiceIT {
         assertEquals("Y", h.getAdvised().getIndicator());
 
         assertEquals("N", repository
-            .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+            .findByRelationshipIdAndSerialNoAndFacilityNo(
                 REL, SERIAL, FACILITY).get().getAdvised().getIndicator());
     }
 
@@ -94,7 +94,7 @@ class FacilityCapitalMarkersServiceIT {
         assertTrue(service.delete(REL, SERIAL, FACILITY, "IT-DELETE"));
 
         assertFalse(repository
-            .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+            .findByRelationshipIdAndSerialNoAndFacilityNo(
                 REL, SERIAL, FACILITY).isPresent());
 
         assertEquals(1, historyRepository.count());
@@ -116,7 +116,7 @@ class FacilityCapitalMarkersServiceIT {
 
         assertEquals(FacilityOperation.CREATED, r.getOperation());
         assertTrue(repository
-            .findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+            .findByRelationshipIdAndSerialNoAndFacilityNo(
                 REL, SERIAL, FACILITY).isPresent());
         assertEquals(1, historyRepository.count());
         assertEquals("123_DELETED_IT-FIRST-DELETE",
@@ -125,7 +125,7 @@ class FacilityCapitalMarkersServiceIT {
 
     private FacilityCapitalMarkersRequest request(String a, String c, String u) {
         FacilityCapitalMarkersRequest r = new FacilityCapitalMarkersRequest();
-        r.setCreditApplicationRelationshipId(REL);
+        r.setRelationshipId(REL);
         r.setSerialNo(SERIAL);
         r.setFacilityNo(FACILITY);
         r.setCustomerId("IT-CUSTOMER");

@@ -39,7 +39,7 @@ class CreditApplicationReportServiceTest {
     void shouldBuildReportFromFacilitiesAndConsents() {
         FacilityCapitalMarkers facility =
                 new FacilityCapitalMarkers();
-        facility.setCreditApplicationRelationshipId("REL001");
+        facility.setRelationshipId("REL001");
         facility.setSerialNo("001");
         facility.setFacilityNo("123");
         facility.setFacilityType("FT01");
@@ -62,7 +62,7 @@ class CreditApplicationReportServiceTest {
         consent.getConsents().add(entry);
 
         when(facilityRepository
-                .findByCreditApplicationRelationshipIdAndSerialNo(
+                .findByRelationshipIdAndSerialNo(
                         "REL001", "001"))
                 .thenReturn(Collections.singletonList(facility));
 
@@ -91,7 +91,7 @@ class CreditApplicationReportServiceTest {
     @Test
     void shouldReturnEmptyReportWhenNoDataExists() {
         when(facilityRepository
-                .findByCreditApplicationRelationshipIdAndSerialNo(
+                .findByRelationshipIdAndSerialNo(
                         "REL001", "001"))
                 .thenReturn(Collections.emptyList());
 

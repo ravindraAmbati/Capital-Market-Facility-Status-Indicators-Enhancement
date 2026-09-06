@@ -40,7 +40,7 @@ class FacilityCapitalMarkersControllerTest {
         FacilityCapitalMarkersResponse response =
                 new FacilityCapitalMarkersResponse();
 
-        response.setCreditApplicationRelationshipId("REL001");
+        response.setRelationshipId("REL001");
         response.setSerialNo("001");
         response.setFacilityNo("123");
         response.setFacilityType("FT01");

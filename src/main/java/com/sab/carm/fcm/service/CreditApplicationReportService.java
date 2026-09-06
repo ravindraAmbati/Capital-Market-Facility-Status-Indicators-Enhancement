@@ -37,7 +37,7 @@ public class CreditApplicationReportService {
 
         List<FacilityCapitalMarkersReportRow> facilities =
                 facilityRepository
-                        .findByCreditApplicationRelationshipIdAndSerialNo(
+                        .findByRelationshipIdAndSerialNo(
                                 relationshipId, serialNo)
                         .stream()
                         .map(this::toRow)
@@ -64,7 +64,7 @@ public class CreditApplicationReportService {
                 new FacilityCapitalMarkersReportRow();
 
         row.setRelationshipId(
-                entity.getCreditApplicationRelationshipId());
+                entity.getRelationshipId());
         row.setSerialNo(entity.getSerialNo());
         row.setFacilityNo(entity.getFacilityNo());
         row.setCustomerId(entity.getCustomerId());

@@ -66,15 +66,12 @@ public class FacilityCapitalMarkers extends BaseEntity {
     @Field("correlationId")
     private String correlationId;
 
-    public String getCreditApplicationRelationshipId() {
+    public String getRelationshipId() {
         return relationshipId;
     }
 
-    public void setCreditApplicationRelationshipId(
-            String relationshipId) {
-
-        this.relationshipId =
-                relationshipId;
+    public void setRelationshipId(String relationshipId) {
+        this.relationshipId = relationshipId;
     }
 
     public String getSerialNo() {

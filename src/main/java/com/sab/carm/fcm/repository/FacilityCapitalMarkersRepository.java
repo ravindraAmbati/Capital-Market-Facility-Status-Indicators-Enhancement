@@ -9,13 +9,13 @@ public interface FacilityCapitalMarkersRepository
         extends MongoRepository<FacilityCapitalMarkers, String> {
 
     Optional<FacilityCapitalMarkers>
-    findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
+    findByRelationshipIdAndSerialNoAndFacilityNo(
             String relationshipId,
             String serialNo,
             String facilityNo);
 
     List<FacilityCapitalMarkers>
-    findByCreditApplicationRelationshipIdAndSerialNo(
+    findByRelationshipIdAndSerialNo(
             String relationshipId,
             String serialNo);
 }
