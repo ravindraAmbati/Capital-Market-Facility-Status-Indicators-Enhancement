@@ -10,12 +10,12 @@ public interface FacilityCapitalMarkersRepository
 
     Optional<FacilityCapitalMarkers>
     findByCreditApplicationRelationshipIdAndSerialNoAndFacilityNo(
-            String creditApplicationRelationshipId,
+            String relationshipId,
             String serialNo,
             String facilityNo);
 
     List<FacilityCapitalMarkers>
     findByCreditApplicationRelationshipIdAndSerialNo(
-            String creditApplicationRelationshipId,
+            String relationshipId,
             String serialNo);
 }

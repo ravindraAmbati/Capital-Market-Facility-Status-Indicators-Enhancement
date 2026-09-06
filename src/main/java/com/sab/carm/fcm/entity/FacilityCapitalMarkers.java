@@ -8,15 +8,15 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @CompoundIndex(
         name = "facility_capital_markers_business_key",
         def = "{"
-                + "'creditApplicationRelationshipId': 1,"
+                + "'relationshipId': 1,"
                 + "'serialNo': 1,"
                 + "'facilityNo': 1"
                 + "}",
         unique = true)
 public class FacilityCapitalMarkers extends BaseEntity {
 
-    @Field("creditApplicationRelationshipId")
-    private String creditApplicationRelationshipId;
+    @Field("relationshipId")
+    private String relationshipId;
 
     @Field("serialNo")
     private String serialNo;
@@ -67,14 +67,14 @@ public class FacilityCapitalMarkers extends BaseEntity {
     private String correlationId;
 
     public String getCreditApplicationRelationshipId() {
-        return creditApplicationRelationshipId;
+        return relationshipId;
     }
 
     public void setCreditApplicationRelationshipId(
-            String creditApplicationRelationshipId) {
+            String relationshipId) {
 
-        this.creditApplicationRelationshipId =
-                creditApplicationRelationshipId;
+        this.relationshipId =
+                relationshipId;
     }
 
     public String getSerialNo() {
