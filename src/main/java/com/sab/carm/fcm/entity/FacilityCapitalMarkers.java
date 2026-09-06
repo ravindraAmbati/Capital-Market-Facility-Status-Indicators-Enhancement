@@ -39,6 +39,9 @@ public class FacilityCapitalMarkers extends BaseEntity {
     @Field("facilityType")
     private String facilityType;
 
+    @Field("underlyingSystemId")
+    private String underlyingSystemId;
+
     @Field("carmPurposeCode")
     private String carmPurposeCode;
 
@@ -128,6 +131,14 @@ public class FacilityCapitalMarkers extends BaseEntity {
 
     public void setFacilityType(String facilityType) {
         this.facilityType = facilityType;
+    }
+
+    public String getUnderlyingSystemId() {
+        return underlyingSystemId;
+    }
+
+    public void setUnderlyingSystemId(String underlyingSystemId) {
+        this.underlyingSystemId = underlyingSystemId;
     }
 
     public String getCarmPurposeCode() {

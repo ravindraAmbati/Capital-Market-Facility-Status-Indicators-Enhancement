@@ -10,6 +10,7 @@ public class FacilityCapitalMarkersReportRow {
     private String proposalType;
     private String applicationStatus;
     private String facilityType;
+    private String underlyingSystemId;
     private String carmPurposeCode;
     private String advised;
     private boolean advisedOverride;
@@ -39,6 +40,15 @@ public class FacilityCapitalMarkersReportRow {
     public void setApplicationStatus(String value) { this.applicationStatus = value; }
     public String getFacilityType() { return facilityType; }
     public void setFacilityType(String value) { this.facilityType = value; }
+
+    public String getUnderlyingSystemId() {
+        return underlyingSystemId;
+    }
+
+    public void setUnderlyingSystemId(String underlyingSystemId) {
+        this.underlyingSystemId = underlyingSystemId;
+    }
+
     public String getCarmPurposeCode() { return carmPurposeCode; }
     public void setCarmPurposeCode(String value) { this.carmPurposeCode = value; }
     public String getAdvised() { return advised; }

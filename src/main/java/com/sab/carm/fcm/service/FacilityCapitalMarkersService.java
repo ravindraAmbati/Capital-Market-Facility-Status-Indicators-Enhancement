@@ -139,6 +139,8 @@ public class FacilityCapitalMarkersService {
         entity.setProposalType(request.getProposalType());
         entity.setApplicationStatus(request.getApplicationStatus());
         entity.setFacilityType(request.getFacilityType());
+        entity.setUnderlyingSystemId(
+                request.getUnderlyingSystemId());
         entity.setCarmPurposeCode(request.getCarmPurposeCode());
         entity.setAdvised(toEntityMarker(request.getAdvised()));
         entity.setCommitted(toEntityMarker(request.getCommitted()));
@@ -199,6 +201,7 @@ public class FacilityCapitalMarkersService {
         history.setProposalType(current.getProposalType());
         history.setApplicationStatus(current.getApplicationStatus());
         history.setFacilityType(current.getFacilityType());
+        history.setUnderlyingSystemId(current.getUnderlyingSystemId());
         history.setCarmPurposeCode(current.getCarmPurposeCode());
         history.setAdvised(current.getAdvised());
         history.setCommitted(current.getCommitted());
@@ -228,6 +231,7 @@ public class FacilityCapitalMarkersService {
                 && equal(current.getProposalType(), request.getProposalType())
                 && equal(current.getApplicationStatus(), request.getApplicationStatus())
                 && equal(current.getFacilityType(), request.getFacilityType())
+                && equal(current.getUnderlyingSystemId(), request.getUnderlyingSystemId())
                 && equal(current.getCarmPurposeCode(), request.getCarmPurposeCode())
                 && sameMarker(current.getAdvised(), request.getAdvised())
                 && sameMarker(current.getCommitted(), request.getCommitted())

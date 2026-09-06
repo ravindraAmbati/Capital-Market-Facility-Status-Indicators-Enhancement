@@ -32,6 +32,8 @@ public class FacilityCapitalMarkersRequest {
     @NotBlank
     private String facilityType;
 
+    private String underlyingSystemId;
+
     @NotBlank
     private String carmPurposeCode;
 
@@ -114,6 +116,14 @@ public class FacilityCapitalMarkersRequest {
 
     public void setFacilityType(String value) {
         this.facilityType = value;
+    }
+
+    public String getUnderlyingSystemId() {
+        return underlyingSystemId;
+    }
+
+    public void setUnderlyingSystemId(String underlyingSystemId) {
+        this.underlyingSystemId = underlyingSystemId;
     }
 
     public String getCarmPurposeCode() {
