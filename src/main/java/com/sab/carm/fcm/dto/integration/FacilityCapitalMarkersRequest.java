@@ -16,7 +16,7 @@ import javax.validation.constraints.Pattern;
 public class FacilityCapitalMarkersRequest {
 
     @NotBlank
-    private String creditApplicationRelationshipId;
+    private String relationshipId;
 
     @NotBlank
     private String serialNo;
@@ -53,11 +53,11 @@ public class FacilityCapitalMarkersRequest {
     private String updatedDateTime;
 
     public String getCreditApplicationRelationshipId() {
-        return creditApplicationRelationshipId;
+        return relationshipId;
     }
 
     public void setCreditApplicationRelationshipId(String value) {
-        this.creditApplicationRelationshipId = value;
+        this.relationshipId = value;
     }
 
     public String getSerialNo() {

@@ -11,7 +11,7 @@
 
 db.facilityCapitalMarkers.createIndex(
   {
-    creditApplicationRelationshipId: 1,
+    relationshipId: 1,
     serialNo: 1,
     facilityNo: 1
   },
@@ -24,7 +24,7 @@ db.facilityCapitalMarkers.createIndex(
 // Credit application report reads facilities by relationshipId + serialNo.
 db.facilityCapitalMarkers.createIndex(
   {
-    creditApplicationRelationshipId: 1,
+    relationshipId: 1,
     serialNo: 1
   },
   {

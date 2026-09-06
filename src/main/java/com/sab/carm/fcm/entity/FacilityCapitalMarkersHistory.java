@@ -12,8 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Document(collection = "facilityCapitalMarkersHistory")
 public class FacilityCapitalMarkersHistory extends BaseEntity {
 
-    @Field("creditApplicationRelationshipId")
-    private String creditApplicationRelationshipId;
+    @Field("relationshipId")
+    private String relationshipId;
 
     @Field("serialNo")
     private String serialNo;
@@ -81,11 +81,11 @@ public class FacilityCapitalMarkersHistory extends BaseEntity {
     private String action;
 
     public String getCreditApplicationRelationshipId() {
-        return creditApplicationRelationshipId;
+        return relationshipId;
     }
 
     public void setCreditApplicationRelationshipId(String value) {
-        this.creditApplicationRelationshipId = value;
+        this.relationshipId = value;
     }
 
     public String getSerialNo() {
