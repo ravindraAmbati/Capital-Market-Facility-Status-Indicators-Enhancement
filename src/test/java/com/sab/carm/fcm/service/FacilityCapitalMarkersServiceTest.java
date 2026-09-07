@@ -50,6 +50,7 @@ class FacilityCapitalMarkersServiceTest {
         assertEquals("001", result.get().getSerialNo());
         assertEquals("123", result.get().getFacilityNo());
         assertEquals("FT01", result.get().getFacilityType());
+        assertEquals("SYSTEM01", result.get().getUnderlyingSystemId());
         assertEquals("PURP01", result.get().getCarmPurposeCode());
         assertEquals("Y", result.get().getAdvised().getIndicator());
         assertTrue(result.get().getAdvised().isOverride());
@@ -80,6 +81,7 @@ class FacilityCapitalMarkersServiceTest {
         entity.setSerialNo("001");
         entity.setFacilityNo("123");
         entity.setFacilityType("FT01");
+        entity.setUnderlyingSystemId("SYSTEM01");
         entity.setCarmPurposeCode("PURP01");
 
         FacilityCapitalMarkers.CapitalMarker advised =

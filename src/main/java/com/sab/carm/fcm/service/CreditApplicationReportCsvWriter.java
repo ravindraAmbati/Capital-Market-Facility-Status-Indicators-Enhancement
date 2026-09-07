@@ -11,7 +11,7 @@ public class CreditApplicationReportCsvWriter {
     private static final String HEADER =
             "RECORD_TYPE,RELATIONSHIP_ID,SERIAL_NO,FACILITY_NO,"
                     + "CUSTOMER_ID,BORROWING_GROUP,PROPOSAL_TYPE,"
-                    + "APPLICATION_STATUS,FACILITY_TYPE,CARM_PURPOSE_CODE,"
+                    + "APPLICATION_STATUS,FACILITY_TYPE,UNDERLYING_SYSTEM_ID,CARM_PURPOSE_CODE,"
                     + "ADVISED,ADVISED_OVERRIDE,ADVISED_OVERRIDE_JUSTIFICATION,"
                     + "COMMITTED,COMMITTED_OVERRIDE,"
                     + "COMMITTED_OVERRIDE_JUSTIFICATION,"
@@ -55,6 +55,7 @@ public class CreditApplicationReportCsvWriter {
                 f.getProposalType(),
                 f.getApplicationStatus(),
                 f.getFacilityType(),
+                f.getUnderlyingSystemId(),
                 f.getCarmPurposeCode(),
                 f.getAdvised(),
                 String.valueOf(f.isAdvisedOverride()),

@@ -43,6 +43,7 @@ class CreditApplicationReportServiceTest {
         facility.setSerialNo("001");
         facility.setFacilityNo("123");
         facility.setFacilityType("FT01");
+        facility.setUnderlyingSystemId("SYSTEM01");
         facility.setCarmPurposeCode("PUR01");
 
         FacilityCapitalMarkers.CapitalMarker advised =
@@ -78,6 +79,9 @@ class CreditApplicationReportServiceTest {
         assertEquals(1, response.getFacilities().size());
         assertEquals("123",
                 response.getFacilities().get(0).getFacilityNo());
+        assertEquals(
+                "SYSTEM01",
+                response.getFacilities().get(0).getUnderlyingSystemId());
         assertEquals("Y",
                 response.getFacilities().get(0).getAdvised());
         assertTrue(
