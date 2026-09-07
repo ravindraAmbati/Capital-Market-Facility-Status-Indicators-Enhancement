@@ -49,10 +49,10 @@ class CreditApplicationReportCsvWriterTest {
 
         assertTrue(lines[1].startsWith(
                 "\"FACILITY\",\"REL001\",\"001\",\"123\""));
-
+        assertTrue(lines[1].contains("\"SYSTEM01\""));
         assertTrue(lines[2].startsWith(
                 "\"FACILITY\",\"REL001\",\"001\",\"456\""));
-
+        assertTrue(lines[2].contains("\"SYSTEM01\""));
         assertTrue(lines[3].startsWith(
                 "\"CONSENT\",\"REL001\",\"001\""));
 
@@ -116,6 +116,31 @@ class CreditApplicationReportCsvWriterTest {
         String csv = writer.write(report);
 
         assertEquals(1, csv.split("\\r?\\n").length);
+    }
+
+    @Test
+    void shouldWriteEmptyUnderlyingSystemIdWhenNotProvided(){
+
+        CreditApplicationReportResponse report =
+                new CreditApplicationReportResponse();
+
+        FacilityCapitalMarkersReportRow facility =
+                facility("123", "Customer One");
+
+        facility.setUnderlyingSystemId(null);
+
+        report.getFacilities().add(facility);
+
+        String csv = writer.write(report);
+        String[] lines = csv.split("\\r?\\n");
+
+        // Header + 2 facility rows + 2 consent rows.
+        assertEquals(2, lines.length);
+
+        assertTrue(lines[1].startsWith(
+                "\"FACILITY\",\"REL001\",\"001\",\"123\""));
+
+
     }
 
     private FacilityCapitalMarkersReportRow facility(

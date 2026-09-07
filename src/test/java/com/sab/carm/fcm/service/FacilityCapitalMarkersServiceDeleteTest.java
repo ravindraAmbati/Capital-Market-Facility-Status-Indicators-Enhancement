@@ -61,6 +61,8 @@ class FacilityCapitalMarkersServiceDeleteTest {
                         && "DELETE".equals(history.getAction())
                         && "CARM-DELETE-001".equals(
                                 history.getCorrelationId())
+                        && "SYSTEM01".equals(
+                        history.getUnderlyingSystemId())
                         && history.getTransactionId() != null));
 
         verify(repository).delete(current);
@@ -90,6 +92,7 @@ class FacilityCapitalMarkersServiceDeleteTest {
         entity.setFacilityNo("123");
         entity.setCustomerId("CUST001");
         entity.setFacilityType("FT01");
+        entity.setUnderlyingSystemId("SYSTEM01");
         entity.setCarmPurposeCode("PURP01");
         entity.setUpdatedBy("AB12");
         entity.setUpdatedDateTime("20260826120000");

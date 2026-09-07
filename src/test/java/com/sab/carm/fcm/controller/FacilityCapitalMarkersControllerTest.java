@@ -44,6 +44,7 @@ class FacilityCapitalMarkersControllerTest {
         response.setSerialNo("001");
         response.setFacilityNo("123");
         response.setFacilityType("FT01");
+        response.setUnderlyingSystemId("SYSTEM01");
         response.setCarmPurposeCode("PURP01");
 
         FacilityCapitalMarkersRequest.CapitalMarkerRequest advised =
@@ -74,7 +75,10 @@ class FacilityCapitalMarkersControllerTest {
                         is("123")))
                 .andExpect(jsonPath(
                         "$.body.facilityType",
-                        is("FT01")));
+                        is("FT01")))
+                .andExpect(jsonPath(
+                        "$.body.underlyingSystemId",
+                        is("SYSTEM01")));
     }
 
     @Test

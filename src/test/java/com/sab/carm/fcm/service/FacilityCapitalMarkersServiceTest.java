@@ -50,6 +50,7 @@ class FacilityCapitalMarkersServiceTest {
         assertEquals("001", result.get().getSerialNo());
         assertEquals("123", result.get().getFacilityNo());
         assertEquals("FT01", result.get().getFacilityType());
+        assertEquals("SYSTEM01", result.get().getUnderlyingSystemId());
         assertEquals("PURP01", result.get().getCarmPurposeCode());
         assertEquals("Y", result.get().getAdvised().getIndicator());
         assertTrue(result.get().getAdvised().isOverride());

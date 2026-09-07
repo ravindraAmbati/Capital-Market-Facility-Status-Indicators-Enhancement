@@ -79,6 +79,9 @@ class CreditApplicationReportServiceTest {
         assertEquals(1, response.getFacilities().size());
         assertEquals("123",
                 response.getFacilities().get(0).getFacilityNo());
+        assertEquals(
+                "SYSTEM01",
+                response.getFacilities().get(0).getUnderlyingSystemId());
         assertEquals("Y",
                 response.getFacilities().get(0).getAdvised());
         assertTrue(
