@@ -43,6 +43,7 @@ class CreditApplicationReportServiceTest {
         facility.setSerialNo("001");
         facility.setFacilityNo("123");
         facility.setFacilityType("FT01");
+        facility.setUnderlyingSystemId("SYSTEM01");
         facility.setCarmPurposeCode("PUR01");
 
         FacilityCapitalMarkers.CapitalMarker advised =

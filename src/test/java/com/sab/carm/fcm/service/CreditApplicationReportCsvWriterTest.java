@@ -130,6 +130,7 @@ class CreditApplicationReportCsvWriterTest {
         row.setFacilityNo(facilityNo);
         row.setCustomerId(customerId);
         row.setFacilityType("FT01");
+        row.setUnderlyingSystemId("SYSTEM01");
         row.setCarmPurposeCode("PUR01");
         row.setAdvised("Y");
         row.setCommitted("Y");

@@ -80,6 +80,7 @@ class FacilityCapitalMarkersServiceTest {
         entity.setSerialNo("001");
         entity.setFacilityNo("123");
         entity.setFacilityType("FT01");
+        entity.setUnderlyingSystemId("SYSTEM01");
         entity.setCarmPurposeCode("PURP01");
 
         FacilityCapitalMarkers.CapitalMarker advised =

@@ -288,6 +288,7 @@ public class FacilityCapitalMarkersService {
         response.setProposalType(entity.getProposalType());
         response.setApplicationStatus(entity.getApplicationStatus());
         response.setFacilityType(entity.getFacilityType());
+        response.setUnderlyingSystemId(entity.getUnderlyingSystemId());
         response.setCarmPurposeCode(entity.getCarmPurposeCode());
         response.setStandingSecurityDocument(
                 entity.getStandingSecurityDocument());
