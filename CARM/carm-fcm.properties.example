@@ -1,0 +1,50 @@
+# ============================================================
+# CARM -> Facility Capital Markers
+# ============================================================
+
+carm.fcm.base-url=https://<FCM-HOST>/<FCM-CONTEXT>
+
+carm.fcm.username=sa-svc-carm-fcm-api
+carm.fcm.password=ENC(<JASYPT-CIPHERTEXT>)
+
+# Prefer IBM WAS JVM Custom Property:
+# carm.fcm.jasypt.password=<MASTER-PASSWORD>
+#
+# The property below is intentionally empty/not required.
+# carm.fcm.jasypt.password=
+
+carm.fcm.jasypt.algorithm=PBEWithMD5AndDES
+
+# Do not allow the CARM integration client to call
+# Logical Reference Table Maintenance/Admin APIs.
+carm.fcm.admin-api-prefix=/api/admin
+
+# Use the ACTUAL FCM REST paths here.
+# The names become keys in the combined reference-data object.
+#
+# Example:
+# carm.fcm.reference-data.endpoints=facilityTypes=/api/reference/facility-types,purposeCodes=/api/reference/purpose-codes,referenceMappings=/api/reference/mappings
+
+carm.fcm.reference-data.endpoints=facilityTypes=<ACTUAL-FCM-FACILITY-TYPE-API>,purposeCodes=<ACTUAL-FCM-PURPOSE-CODE-API>
+
+carm.fcm.connect-timeout-ms=5000
+carm.fcm.read-timeout-ms=15000
+
+# Scheduled refresh interval.
+carm.fcm.cache.refresh-interval-ms=3600000
+
+# Soft TTL: return current value and refresh asynchronously.
+carm.fcm.cache.soft-ttl-ms=3300000
+
+# Hard TTL: synchronous refresh is attempted.
+carm.fcm.cache.hard-ttl-ms=7200000
+
+carm.fcm.retry.max-attempts=3
+carm.fcm.retry.initial-backoff-ms=500
+carm.fcm.retry.max-backoff-ms=5000
+carm.fcm.retry.multiplier=2.0
+
+# Notification provision.
+carm.fcm.notification.enabled=true
+carm.fcm.notification.from=carm-fcm@<DOMAIN>
+carm.fcm.notification.to=<CARM-SUPPORT-MAILBOX>

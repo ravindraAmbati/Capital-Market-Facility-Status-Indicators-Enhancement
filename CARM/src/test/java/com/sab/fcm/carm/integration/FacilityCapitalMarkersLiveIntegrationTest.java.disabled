@@ -1,0 +1,37 @@
+/*
+ * Rename this file to .java only when running against an actual FCM environment.
+ *
+ * IMPORTANT:
+ * - Configure carm-fcm.properties with a non-PROD environment.
+ * - Configure the real reference-data endpoints.
+ * - Supply the Jasypt master password through IBM WAS JVM property or
+ *   the test environment.
+ */
+package com.sab.fcm.carm.integration;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.sab.fcm.carm.service.CarmFcmMasterService;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertNotNull;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = com.sab.fcm.carm.config.CarmFcmConfiguration.class)
+@Ignore("Enable explicitly for a real non-PROD Facility Capital Markers environment")
+public class FacilityCapitalMarkersLiveIntegrationTest {
+
+    @Autowired
+    private CarmFcmMasterService masterService;
+
+    @Test
+    public void shouldLoadReferenceDataFromFacilityCapitalMarkers() {
+        JsonNode result = masterService.getReferenceData();
+        assertNotNull(result);
+        assertNotNull(result.fields());
+    }
+}

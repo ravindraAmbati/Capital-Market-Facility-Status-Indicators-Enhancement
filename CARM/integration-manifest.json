@@ -1,0 +1,17 @@
+{
+  "targetBranch": "feature/FCM-CARM",
+  "packages": [
+    "com.sab.fcm.carm",
+    "com.sab.carm.fcm"
+  ],
+  "java": "JDK 8",
+  "spring": "4.2.4.RELEASE",
+  "junit": "4.12",
+  "mockito": "1.10.19",
+  "powermock": "1.6.6",
+  "jasypt": "1.9.3",
+  "cacheScope": "Reference Logical Data only",
+  "businessDataCached": false,
+  "reportsCached": false,
+  "adminApisAllowed": false
+}
