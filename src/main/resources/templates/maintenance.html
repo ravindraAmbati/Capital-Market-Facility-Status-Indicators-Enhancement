@@ -76,165 +76,20 @@
 
             <button type="button"
                     class="btn btn-primary"
-                    onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})">
+                    onclick="document.getElementById('facilityTypeForm').scrollIntoView({behavior: 'smooth'})">
                 Add Record
             </button>
         </div>
 
-        <section class="maintenance-card">
-            <div class="table-header">
-                <h2>Facility Types</h2>
-                <a class="btn btn-secondary"
-                   th:href="@{/maintenance}">
-                    Refresh
-                </a>
-            </div>
-
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Description</th>
-                        <th>Advised</th>
-                        <th>Committed</th>
-                        <th>Active</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-                    <tr th:each="item : ${facilityTypes}">
-                        <td th:text="${item.facilityTypeCode}">1200</td>
-                        <td th:text="${item.facilityTypeDescription}">
-                            Example
-                        </td>
-                        <td th:text="${item.advised}">Y</td>
-                        <td th:text="${item.committed}">Y</td>
-                        <td>
-                            <span class="status-active"
-                                  th:if="${item.active}">
-                                Active
-                            </span>
-                        </td>
-                        <td class="actions">
-                            <button type="button"
-                                    class="btn btn-primary btn-small"
-                                    th:attr="data-code=${item.facilityTypeCode},
-                                             data-description=${item.facilityTypeDescription},
-                                             data-advised=${item.advised},
-                                             data-committed=${item.committed}"
-                                    onclick="editFacilityType(this)">
-                                Edit
-                            </button>
-
-                            <form th:action="@{/maintenance/facility-types/delete}"
-                                  method="post"
-                                  class="inline-form"
-                                  onsubmit="return confirmDelete('facility type');">
-                                <input type="hidden"
-                                       name="facilityTypeCode"
-                                       th:value="${item.facilityTypeCode}">
-                                <button type="submit"
-                                        class="btn btn-danger btn-small">
-                                    Delete
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-
-                    <tr th:if="${#lists.isEmpty(facilityTypes)}">
-                        <td colspan="6"
-                            class="empty-state">
-                            No active facility types found.
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+        <!-- =========================
+             Facility Type Maintenance
+             ========================= -->
 
         <section class="maintenance-card">
-            <div class="table-header">
-                <h2>Purpose Codes</h2>
-                <a class="btn btn-secondary"
-                   th:href="@{/maintenance}">
-                    Refresh
-                </a>
-            </div>
 
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Hub Code</th>
-                        <th>CARM Code</th>
-                        <th>Description</th>
-                        <th>Unconditional Cancellable</th>
-                        <th>Active</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-                    <tr th:each="item : ${purposeCodes}">
-                        <td th:text="${item.purposeCodeHub}">HUB01</td>
-                        <td th:text="${item.purposeCodeCarm}">PC01</td>
-                        <td th:text="${item.description}">
-                            Example
-                        </td>
-                        <td th:text="${item.unconditionalCancellable}">
-                            Y
-                        </td>
-                        <td>
-                            <span class="status-active"
-                                  th:if="${item.active}">
-                                Active
-                            </span>
-                        </td>
-                        <td class="actions">
-                            <button type="button"
-                                    class="btn btn-primary btn-small"
-                                    th:attr="data-hub=${item.purposeCodeHub},
-                                             data-carm=${item.purposeCodeCarm},
-                                             data-description=${item.description},
-                                             data-unconditional=${item.unconditionalCancellable}"
-                                    onclick="editPurposeCode(this)">
-                                Edit
-                            </button>
-
-                            <form th:action="@{/maintenance/purpose-codes/delete}"
-                                  method="post"
-                                  class="inline-form"
-                                  onsubmit="return confirmDelete('purpose code');">
-                                <input type="hidden"
-                                       name="purposeCodeHub"
-                                       th:value="${item.purposeCodeHub}">
-                                <input type="hidden"
-                                       name="purposeCodeCarm"
-                                       th:value="${item.purposeCodeCarm}">
-                                <button type="submit"
-                                        class="btn btn-danger btn-small">
-                                    Delete
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-
-                    <tr th:if="${#lists.isEmpty(purposeCodes)}">
-                        <td colspan="6"
-                            class="empty-state">
-                            No active purpose codes found.
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section class="maintenance-card">
             <div class="table-header">
                 <h2>Add / Edit Facility Type</h2>
+
                 <button type="button"
                         class="btn btn-secondary"
                         onclick="resetFacilityForm()">
@@ -253,6 +108,7 @@
                        value="true">
 
                 <div class="form-grid">
+
                     <label>
                         Facility Type Code
                         <input id="facilityTypeCode"
@@ -286,9 +142,11 @@
                             <option value="N">N</option>
                         </select>
                     </label>
+
                 </div>
 
                 <div class="form-actions">
+
                     <button type="submit"
                             class="btn btn-primary">
                         Save
@@ -299,13 +157,122 @@
                             onclick="resetFacilityForm()">
                         Cancel / Reset
                     </button>
+
                 </div>
+
             </form>
+
         </section>
 
         <section class="maintenance-card">
+
+            <div class="table-header">
+                <h2>Facility Types</h2>
+
+                <a class="btn btn-secondary"
+                   th:href="@{/maintenance}">
+                    Refresh
+                </a>
+            </div>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Description</th>
+                        <th>Advised</th>
+                        <th>Committed</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="item : ${facilityTypes}">
+
+                        <td th:text="${item.facilityTypeCode}">
+                            1200
+                        </td>
+
+                        <td th:text="${item.facilityTypeDescription}">
+                            Example
+                        </td>
+
+                        <td th:text="${item.advised}">
+                            Y
+                        </td>
+
+                        <td th:text="${item.committed}">
+                            Y
+                        </td>
+
+                        <td>
+                        <span class="status-active"
+                              th:if="${item.active}">
+                            Active
+                        </span>
+                        </td>
+
+                        <td class="actions">
+
+                            <button type="button"
+                                    class="btn btn-primary btn-small"
+                                    th:attr="data-code=${item.facilityTypeCode},
+                                         data-description=${item.facilityTypeDescription},
+                                         data-advised=${item.advised},
+                                         data-committed=${item.committed}"
+                                    onclick="editFacilityType(this)">
+                                Edit
+                            </button>
+
+                            <form th:action="@{/maintenance/facility-types/delete}"
+                                  method="post"
+                                  class="inline-form"
+                                  onsubmit="return confirmDelete('facility type');">
+
+                                <input type="hidden"
+                                       name="facilityTypeCode"
+                                       th:value="${item.facilityTypeCode}">
+
+                                <button type="submit"
+                                        class="btn btn-danger btn-small">
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(facilityTypes)}">
+                        <td colspan="6"
+                            class="empty-state">
+                            No active facility types found.
+                        </td>
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+             Purpose Code Maintenance
+             ========================= -->
+
+        <section class="maintenance-card">
+
             <div class="table-header">
                 <h2>Add / Edit Purpose Code</h2>
+
                 <button type="button"
                         class="btn btn-secondary"
                         onclick="resetPurposeForm()">
@@ -324,6 +291,7 @@
                        value="true">
 
                 <div class="form-grid">
+
                     <label>
                         HUB Purpose Code
                         <input id="purposeCodeHub"
@@ -354,9 +322,11 @@
                             <option value="N">N</option>
                         </select>
                     </label>
+
                 </div>
 
                 <div class="form-actions">
+
                     <button type="submit"
                             class="btn btn-primary">
                         Save
@@ -367,8 +337,115 @@
                             onclick="resetPurposeForm()">
                         Cancel / Reset
                     </button>
+
                 </div>
+
             </form>
+
+        </section>
+
+        <section class="maintenance-card">
+
+            <div class="table-header">
+                <h2>Purpose Codes</h2>
+
+                <a class="btn btn-secondary"
+                   th:href="@{/maintenance}">
+                    Refresh
+                </a>
+            </div>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                    <tr>
+                        <th>Hub Code</th>
+                        <th>CARM Code</th>
+                        <th>Description</th>
+                        <th>Unconditional Cancellable</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="item : ${purposeCodes}">
+
+                        <td th:text="${item.purposeCodeHub}">
+                            HUB01
+                        </td>
+
+                        <td th:text="${item.purposeCodeCarm}">
+                            PC01
+                        </td>
+
+                        <td th:text="${item.description}">
+                            Example
+                        </td>
+
+                        <td th:text="${item.unconditionalCancellable}">
+                            Y
+                        </td>
+
+                        <td>
+                        <span class="status-active"
+                              th:if="${item.active}">
+                            Active
+                        </span>
+                        </td>
+
+                        <td class="actions">
+
+                            <button type="button"
+                                    class="btn btn-primary btn-small"
+                                    th:attr="data-hub=${item.purposeCodeHub},
+                                         data-carm=${item.purposeCodeCarm},
+                                         data-description=${item.description},
+                                         data-unconditional=${item.unconditionalCancellable}"
+                                    onclick="editPurposeCode(this)">
+                                Edit
+                            </button>
+
+                            <form th:action="@{/maintenance/purpose-codes/delete}"
+                                  method="post"
+                                  class="inline-form"
+                                  onsubmit="return confirmDelete('purpose code');">
+
+                                <input type="hidden"
+                                       name="purposeCodeHub"
+                                       th:value="${item.purposeCodeHub}">
+
+                                <input type="hidden"
+                                       name="purposeCodeCarm"
+                                       th:value="${item.purposeCodeCarm}">
+
+                                <button type="submit"
+                                        class="btn btn-danger btn-small">
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(purposeCodes)}">
+                        <td colspan="6"
+                            class="empty-state">
+                            No active purpose codes found.
+                        </td>
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
         </section>
 
     </section>
