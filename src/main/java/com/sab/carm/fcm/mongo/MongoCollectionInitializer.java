@@ -1,17 +1,20 @@
 package com.sab.carm.fcm.mongo;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
 @Component
+@DependsOn("mongoConnectionValidator")
 public class MongoCollectionInitializer {
 
     private static final Logger LOGGER =
-            LoggerFactory.getLogger(MongoCollectionInitializer.class);
+            LoggerFactory.getLogger(
+                    MongoCollectionInitializer.class);
 
     private final MongoTemplate mongoTemplate;
 
@@ -30,43 +33,53 @@ public class MongoCollectionInitializer {
 
         if (!mongoProperties.isInitializeCollections()) {
 
-            LOGGER.info("MongoDB collection initialization is disabled.");
+            LOGGER.info(
+                    "MongoDB collection initialization is disabled.");
 
             return;
         }
 
-        createCollection(
-                mongoProperties.getDbCollectionNames()
-                        .getFacilityCapitalMarkers());
+        for (MongoProperties.CollectionDefinition definition :
+                mongoProperties.getDbCollectionNames().asList()) {
 
-        createCollection(
-                mongoProperties.getDbCollectionNames()
-                        .getFacilityCapitalMarkersDecisionHistory());
-
-        createCollection(
-                mongoProperties.getDbCollectionNames()
-                        .getCreditApplicationCapitalMarkersReport());
-
-        createCollection(
-                mongoProperties.getDbCollectionNames()
-                        .getApplicationAuditLog());
-
-        createCollection(
-                mongoProperties.getDbCollectionNames()
-                        .getReferenceDataMappings());
+            createCollection(definition);
+        }
     }
 
-    private void createCollection(String collectionName) {
+    private void createCollection(
+            MongoProperties.CollectionDefinition definition) {
+
+        if (definition == null
+                || !definition.isCreateIfMissing()) {
+
+            return;
+        }
+
+        String collectionName = definition.getName();
+
+        if (collectionName == null
+                || collectionName.trim().isEmpty()) {
+
+            LOGGER.warn(
+                    "Skipping MongoDB collection initialization because "
+                            + "collection name is not configured.");
+
+            return;
+        }
 
         if (!mongoTemplate.collectionExists(collectionName)) {
 
-            LOGGER.info("Creating MongoDB collection [{}]", collectionName);
+            LOGGER.info(
+                    "Creating MongoDB collection [{}]",
+                    collectionName);
 
             mongoTemplate.createCollection(collectionName);
 
         } else {
 
-            LOGGER.info("MongoDB collection [{}] already exists.", collectionName);
+            LOGGER.info(
+                    "MongoDB collection [{}] already exists.",
+                    collectionName);
         }
     }
 }

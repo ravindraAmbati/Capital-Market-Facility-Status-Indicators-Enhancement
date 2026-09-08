@@ -8,11 +8,13 @@ spring:
       auto-index-creation: false
   thymeleaf:
     cache: true
+
 server:
   port: 8080
   servlet:
     session:
       timeout: 30m
+
 management:
   endpoints:
     web:
@@ -24,11 +26,13 @@ management:
   info:
     env:
       enabled: false
+
 info:
   app:
     name: CARM Facility Capital Markers
     version: 2026.08
     buildTimestamp: ${BUILD_TIMESTAMP:local}
+
 ldap:
   initialContextFactory: com.sun.jndi.ldap.LdapCtxFactory
   providerUrl: ldap://localhost:389
@@ -39,6 +43,7 @@ ldap:
   readTimeoutMillis: 5000
   bindUsername: sa-svc-carm-bind
   bindPassword: ENC(BIND-ACCOUNT-ENCRYPTED-PASSWORD)
+
 security:
   authenticationMode: ldap
   passwordPolicy:
@@ -56,27 +61,131 @@ security:
       - sa-svc-carm-audit
     itsup:
       - sa-svc-carm-itsup
+
 mongodb:
-  validateConnection: false
-  initializeCollections: false
-  initializeIndexes: false
+  validateConnection: true
+  initializeCollections: true
+  initializeIndexes: true
+
   dbCollectionNames:
-    facilityCapitalMarkers: facilityCapitalMarkers
-    facilityCapitalMarkersDecisionHistory: facilityCapitalMarkersDecisionHistory
-    applicationAuditLog: applicationAuditLog
-    referenceDataMappings: referenceDataMappings
-    facilityTypeMaintenance: facilityTypeMaintenance
-    purposeCodeMaintenance: purposeCodeMaintenance
-    maintenanceHistory: maintenanceHistory
+
+    facilityCapitalMarkers:
+      name: facilityCapitalMarkers
+      createIfMissing: true
+      indexes:
+        - name: facility_capital_markers_business_key
+          fields:
+            relationshipId: 1
+            serialNo: 1
+            facilityNo: 1
+          unique: true
+
+        - name: facility_capital_markers_credit_application
+          fields:
+            relationshipId: 1
+            serialNo: 1
+          unique: false
+
+    facilityCapitalMarkersHistory:
+      name: facilityCapitalMarkersHistory
+      createIfMissing: true
+      indexes: []
+
+    creditApplicationConsent:
+      name: creditApplicationConsent
+      createIfMissing: true
+      indexes:
+        - name: credit_application_consent_business_key
+          fields:
+            relationshipId: 1
+            serialNo: 1
+          unique: true
+
+    apiAudit:
+      name: apiAudit
+      createIfMissing: true
+      indexes:
+        - name: api_audit_trace
+          fields:
+            correlationId: 1
+            transactionId: 1
+          unique: false
+
+        - name: api_audit_credit_application_time
+          fields:
+            relationshipId: 1
+            serialNo: 1
+            timestamp: -1
+          unique: false
+
+    auditRecords:
+      name: audit_records
+      createIfMissing: true
+      indexes:
+        - name: audit_event_type
+          fields:
+            eventType: 1
+          unique: false
+
+        - name: audit_result
+          fields:
+            result: 1
+          unique: false
+
+        - name: audit_username
+          fields:
+            username: 1
+          unique: false
+
+    applicationVersion:
+      name: applicationVersion
+      createIfMissing: true
+      indexes:
+        - name: version
+          fields:
+            version: 1
+          unique: true
+
+    referenceDataMappings:
+      name: referenceDataMappings
+      createIfMissing: true
+      indexes: []
+
+    facilityTypeMaintenance:
+      name: facilityTypeMaintenance
+      createIfMissing: true
+      indexes:
+        - name: facility_type_code
+          fields:
+            facilityTypeCode: 1
+          unique: true
+
+    purposeCodeMaintenance:
+      name: purposeCodeMaintenance
+      createIfMissing: true
+      indexes:
+        - name: purpose_code_business_key
+          fields:
+            purposeCodeHub: 1
+            purposeCodeCarm: 1
+          unique: true
+
+    maintenanceHistory:
+      name: maintenanceHistory
+      createIfMissing: true
+      indexes: []
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
 logging:
   level:
     root: INFO
     org.springframework: INFO
     org.mongodb.driver: INFO
     com.sab.carm.fcm: INFO
+
 carm:
   api:
     base-url: https://{hostname}
