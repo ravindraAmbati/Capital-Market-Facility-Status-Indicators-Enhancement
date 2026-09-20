@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
 @Component
 public class MongoConnectionValidator {
 
@@ -24,11 +26,13 @@ public class MongoConnectionValidator {
         this.mongoProperties = mongoProperties;
     }
 
+    @PostConstruct
     public void validate() {
 
         if (!mongoProperties.isValidateConnection()) {
 
-            LOGGER.info("MongoDB connection validation is disabled.");
+            LOGGER.info(
+                    "MongoDB connection validation is disabled.");
 
             return;
         }
@@ -41,11 +45,14 @@ public class MongoConnectionValidator {
                     .getDatabase("admin")
                     .runCommand(new Document("ping", 1));
 
-            LOGGER.info("MongoDB connection validated successfully.");
+            LOGGER.info(
+                    "MongoDB connection validated successfully.");
 
         } catch (Exception ex) {
 
-            LOGGER.error("MongoDB connection validation failed.", ex);
+            LOGGER.error(
+                    "MongoDB connection validation failed.",
+                    ex);
 
             throw new IllegalStateException(
                     "Unable to connect to MongoDB.",
